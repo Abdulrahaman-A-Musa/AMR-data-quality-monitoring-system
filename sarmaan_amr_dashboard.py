@@ -258,7 +258,7 @@ st.markdown(
 
 # ---------------- DATA SOURCE ----------------
 # Replace with your actual KoboToolbox export URL
-DATA_URL = "https://kf.kobotoolbox.org/api/v2/assets/aCddKcS2rVF7zJP9fHRWPz/export-settings/esgZhUs8BZoiVwYSPbLHSHA/data.xlsx"
+DATA_URL = st.secrets.get("DATA_URL ", "")
 MAIN_SHEET = "SARMAAN II AMR YOBE STATE"
 MOTHER_SHEET = "mother_information"
 CHILD_SHEET = "child_info"
@@ -1310,3 +1310,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+

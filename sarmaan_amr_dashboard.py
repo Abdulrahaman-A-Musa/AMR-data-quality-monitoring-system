@@ -8,6 +8,8 @@ import pandas as pd
 import streamlit as st
 import requests
 from io import BytesIO
+import plotly.express as px
+import plotly.graph_objects as go
 
 # ---------------- PAGE CONFIGURATION ----------------
 st.set_page_config(
@@ -651,6 +653,220 @@ def identify_data_quality_issues(df_main, df_mother, df_child):
     
     return pd.DataFrame(issues)
 
+def perform_comprehensive_qc_checks(df_main, df_mother, df_child):
+    """
+    Perform comprehensive QC checks across all three sheets
+    Returns a DataFrame with all QC issues found
+    """
+    qc_issues = []
+    
+    if df_main.empty:
+        return pd.DataFrame(qc_issues)
+    
+    # Merge dataframes to perform cross-sheet validations
+    # Merge main with mother using _uuid
+    if not df_mother.empty:
+        df_merged = df_main.merge(
+            df_mother,
+            left_on='_uuid',
+            right_on='_submission__uuid',
+            how='left',
+            suffixes=('', '_mother')
+        )
+    else:
+        df_merged = df_main.copy()
+    
+    # Merge with child data
+    if not df_child.empty:
+        df_with_child = df_main.merge(
+            df_child,
+            left_on='_uuid',
+            right_on='_submission__uuid',
+            how='left',
+            suffixes=('', '_child')
+        )
+    else:
+        df_with_child = df_main.copy()
+    
+    # QC CHECK 1: Education-Occupation Mismatch
+    # If Q13 (highest education level) = "Non Formal Education" AND Q15 (occupation) = "Professional/Managerial"
+    education_col = 'Q13. What is the highest level of school you attended: primary, secondary, or higher?\nMenene zurfin ilimin ki?\t\nMakarantar firamare, ko sakandare, ko fiye da haka?'
+    occupation_col = "Q15. Household head's occupation"
+    
+    if education_col in df_main.columns and occupation_col in df_main.columns:
+        edu_occ_mismatch = df_main[
+            (df_main[education_col] == 'Non Formal Education') &
+            (df_main[occupation_col] == 'Professional/Managerial')
+        ]
+        
+        for idx, row in edu_occ_mismatch.iterrows():
+            qc_issues.append({
+                'LGA': row.get('Q3. Local Government Area', ''),
+                'Ward': row.get('Q4. Ward', ''),
+                'Community': row.get('Q5. Community Name', ''),
+                'Unique HH ID': row.get('unique_code', ''),
+                'Enumerator': row.get('username', ''),
+                'Validation Status': row.get('_validation_status', ''),
+                'Issue Type': 'Education-Occupation Mismatch',
+                'Description': 'No formal education but has Professional/Managerial occupation'
+            })
+    
+    # QC CHECK 2: Urban Settlement with No Basic Amenities
+    # All amenity questions must = "No" and settlement type = "Urban"
+    settlement_col = 'Choose the settlement type'
+    amenity_cols = [
+        'Q18. Does your household have a television?',
+        'Q19. Does your household have an electric iron?',
+        'Q20. Does your household have a fan?',
+        'Q21. Does your household have a refrigerator?',
+        'Q22. Does your household have electricity?',
+        'Q23. Does your household have a generator?',
+        'Q24. Does any member of the household have a bank account?',
+        'Q25. Does any member of the household have a watch?',
+        'Q26.Does your household have any of the following (Donkey,Camel,Cattle,Horse)?',
+        'Q27. Does your household have truck?',
+        'Q28. Does your household have bicycle?',
+        'Q29. Does your household have tricycle?',
+        'Q30. Does your household have computer?',
+        'Q31. Does your household have table?',
+        'Q32. Does your household have air condition?'
+    ]
+    
+    if settlement_col in df_main.columns:
+        # Check which amenity columns exist
+        existing_amenity_cols = [col for col in amenity_cols if col in df_main.columns]
+        
+        if existing_amenity_cols:
+            # Create a mask for all amenities being "No"
+            all_no_mask = pd.Series([True] * len(df_main), index=df_main.index)
+            for col in existing_amenity_cols:
+                all_no_mask = all_no_mask & (df_main[col] == 'No')
+            
+            # Find urban settlements with no basic amenities
+            urban_no_amenities = df_main[
+                (df_main[settlement_col] == 'Urban') & all_no_mask
+            ]
+            
+            for idx, row in urban_no_amenities.iterrows():
+                qc_issues.append({
+                    'LGA': row.get('Q3. Local Government Area', ''),
+                    'Ward': row.get('Q4. Ward', ''),
+                    'Community': row.get('Q5. Community Name', ''),
+                    'Unique HH ID': row.get('unique_code', ''),
+                    'Enumerator': row.get('username', ''),
+                    'Validation Status': row.get('_validation_status', ''),
+                    'Issue Type': 'Urban-No Basic Amenities',
+                    'Description': 'Urban settlement but household has no basic amenities'
+                })
+    
+    # QC CHECK 3: Children count mismatch (Q48 vs Q56 in mother sheet)
+    # Q48 in main sheet should equal Q56 in mother sheet
+    main_children_col = 'Q48. How many children in the household are 1-59 months of age?'
+    mother_children_col = 'Q56. Total Number of Children 1 - 59 months'
+    
+    if main_children_col in df_merged.columns and mother_children_col in df_merged.columns:
+        children_mismatch = df_merged[
+            (df_merged[main_children_col].notna()) &
+            (df_merged[mother_children_col].notna()) &
+            (df_merged[main_children_col] != df_merged[mother_children_col])
+        ]
+        
+        for idx, row in children_mismatch.iterrows():
+            qc_issues.append({
+                'LGA': row.get('Q3. Local Government Area', ''),
+                'Ward': row.get('Q4. Ward', ''),
+                'Community': row.get('Q5. Community Name', ''),
+                'Unique HH ID': row.get('unique_code', ''),
+                'Enumerator': row.get('username', ''),
+                'Validation Status': row.get('_validation_status', ''),
+                'Issue Type': 'Children Count Mismatch (1-59 months)',
+                'Description': f'Main sheet: {row[main_children_col]}, Mother sheet: {row[mother_children_col]}'
+            })
+    
+    # QC CHECK 4: Infants count mismatch (Q49 vs Q55 in mother sheet)
+    main_infants_col = 'Q49. How many children in the household are 0 - 28 days of age?'
+    mother_infants_col = 'Q55. Total Number of Children less than 1 month'
+    
+    if main_infants_col in df_merged.columns and mother_infants_col in df_merged.columns:
+        infants_mismatch = df_merged[
+            (df_merged[main_infants_col].notna()) &
+            (df_merged[mother_infants_col].notna()) &
+            (df_merged[main_infants_col] != df_merged[mother_infants_col])
+        ]
+        
+        for idx, row in infants_mismatch.iterrows():
+            qc_issues.append({
+                'LGA': row.get('Q3. Local Government Area', ''),
+                'Ward': row.get('Q4. Ward', ''),
+                'Community': row.get('Q5. Community Name', ''),
+                'Unique HH ID': row.get('unique_code', ''),
+                'Enumerator': row.get('username', ''),
+                'Validation Status': row.get('_validation_status', ''),
+                'Issue Type': 'Infants Count Mismatch (0-28 days)',
+                'Description': f'Main sheet: {row[main_infants_col]}, Mother sheet: {row[mother_infants_col]}'
+            })
+    
+    # QC CHECK 5: AZM recipients exceeds total children
+    # Q58 (AZM recipients) should not be greater than Q47 (total children 0-59 months)
+    main_total_children_col = 'Q47. How many children in the household are 0-59 months of age?'
+    azm_recipients_col = 'Q58.If yes, how many children received AZM?'
+    
+    if main_total_children_col in df_merged.columns and azm_recipients_col in df_merged.columns:
+        azm_exceeds = df_merged[
+            (df_merged[azm_recipients_col].notna()) &
+            (df_merged[main_total_children_col].notna()) &
+            (pd.to_numeric(df_merged[azm_recipients_col], errors='coerce') > 
+             pd.to_numeric(df_merged[main_total_children_col], errors='coerce'))
+        ]
+        
+        for idx, row in azm_exceeds.iterrows():
+            qc_issues.append({
+                'LGA': row.get('Q3. Local Government Area', ''),
+                'Ward': row.get('Q4. Ward', ''),
+                'Community': row.get('Q5. Community Name', ''),
+                'Unique HH ID': row.get('unique_code', ''),
+                'Enumerator': row.get('username', ''),
+                'Validation Status': row.get('_validation_status', ''),
+                'Issue Type': 'AZM Recipients Exceeds Total Children',
+                'Description': f'AZM recipients: {row[azm_recipients_col]}, Total children: {row[main_total_children_col]}'
+            })
+    
+    # QC CHECK 6: Child age greater than 59 months
+    child_age_col = 'c_age'
+    
+    if not df_child.empty and child_age_col in df_child.columns:
+        age_exceeds = df_child[
+            pd.to_numeric(df_child[child_age_col], errors='coerce') > 59
+        ]
+        
+        # Merge with main to get household details
+        if not age_exceeds.empty:
+            age_exceeds_merged = age_exceeds.merge(
+                df_main[['_uuid', 'Q3. Local Government Area', 'Q4. Ward', 'Q5. Community Name', 'unique_code', 'username', '_validation_status']],
+                left_on='_submission__uuid',
+                right_on='_uuid',
+                how='left'
+            )
+            
+            for idx, row in age_exceeds_merged.iterrows():
+                qc_issues.append({
+                    'LGA': row.get('Q3. Local Government Area', ''),
+                    'Ward': row.get('Q4. Ward', ''),
+                    'Community': row.get('Q5. Community Name', ''),
+                    'Unique HH ID': row.get('unique_code', ''),
+                    'Enumerator': row.get('username', ''),
+                    'Validation Status': row.get('_validation_status', ''),
+                    'Issue Type': 'Age Inconsistency',
+                    'Description': f'Child age ({row[child_age_col]} months) exceeds 59 months'
+                })
+    
+    # Convert to DataFrame
+    if qc_issues:
+        qc_df = pd.DataFrame(qc_issues)
+        return qc_df
+    else:
+        return pd.DataFrame(columns=['LGA', 'Ward', 'Community', 'Unique HH ID', 'Enumerator', 'Validation Status', 'Issue Type', 'Description'])
+
 # ---------------- LOGIN PAGE ----------------
 def login_page():
     """Display login interface"""
@@ -968,6 +1184,113 @@ def run_dashboard(df_main, df_mother, df_child):
             """,
             unsafe_allow_html=True
         )
+    
+    # Quality Control Checks Section
+    st.markdown('<div class="section-header"><h2 class="section-title">🔍 Quality Control Checks</h2></div>', unsafe_allow_html=True)
+    
+    # Perform comprehensive QC checks
+    qc_issues_df = perform_comprehensive_qc_checks(df_main, df_mother, df_child)
+    
+    # Calculate QC metrics
+    total_issues = len(qc_issues_df)
+    age_inconsistencies = len(qc_issues_df[qc_issues_df['Issue Type'] == 'Age Inconsistency'])
+    duplicates = qc_metrics['duplicate_households'] + qc_metrics['duplicate_mothers'] + qc_metrics['duplicate_children']
+    other_issues = total_issues - age_inconsistencies
+    
+    # Display QC summary metrics
+    col1, col2, col3, col4 = st.columns(4)
+    
+    with col1:
+        st.metric("Total Issues Found", f"{total_issues:,}")
+    with col2:
+        st.metric("Age Inconsistencies", f"{age_inconsistencies:,}")
+    with col3:
+        st.metric("Duplicates", f"{duplicates:,}")
+    with col4:
+        st.metric("Other Issues", f"{other_issues:,}")
+    
+    # Distribution of QC Issues Chart
+    if not qc_issues_df.empty:
+        st.markdown("#### Distribution of QC Issues")
+        
+        issue_counts = qc_issues_df['Issue Type'].value_counts().reset_index()
+        issue_counts.columns = ['Issue Type', 'Count']
+        
+        fig = px.bar(
+            issue_counts,
+            x='Issue Type',
+            y='Count',
+            title='',
+            color='Count',
+            color_continuous_scale='Reds',
+            text='Count'
+        )
+        fig.update_traces(textposition='outside')
+        fig.update_layout(
+            height=400,
+            xaxis_title="Issue Type",
+            yaxis_title="Count",
+            xaxis_tickangle=-45,
+            showlegend=False
+        )
+        st.plotly_chart(fig, use_container_width=True)
+        
+        # Detailed QC Issues Table
+        st.markdown("### 📋 Detailed QC Issues Table")
+        st.markdown(f"**{total_issues:,}** issues flagged across LGA, Ward, and Community")
+        
+        # Add filter expander
+        with st.expander("🔍 Filter QC Issues (Optional)"):
+            filter_col1, filter_col2, filter_col3 = st.columns(3)
+            
+            with filter_col1:
+                selected_lga_filter = st.multiselect(
+                    "Filter by LGA",
+                    options=sorted(qc_issues_df['LGA'].unique().tolist()),
+                    default=None
+                )
+            
+            with filter_col2:
+                selected_issue_type = st.multiselect(
+                    "Filter by Issue Type",
+                    options=sorted(qc_issues_df['Issue Type'].unique().tolist()),
+                    default=None
+                )
+            
+            with filter_col3:
+                selected_validation = st.multiselect(
+                    "Filter by Validation Status",
+                    options=sorted(qc_issues_df['Validation Status'].dropna().unique().tolist()),
+                    default=None
+                )
+        
+        # Apply filters
+        filtered_qc_df = qc_issues_df.copy()
+        if selected_lga_filter:
+            filtered_qc_df = filtered_qc_df[filtered_qc_df['LGA'].isin(selected_lga_filter)]
+        if selected_issue_type:
+            filtered_qc_df = filtered_qc_df[filtered_qc_df['Issue Type'].isin(selected_issue_type)]
+        if selected_validation:
+            filtered_qc_df = filtered_qc_df[filtered_qc_df['Validation Status'].isin(selected_validation)]
+        
+        # Display filtered table
+        st.dataframe(
+            filtered_qc_df,
+            use_container_width=True,
+            hide_index=True,
+            height=400
+        )
+        
+        # Download button for QC issues
+        csv = filtered_qc_df.to_csv(index=False)
+        st.download_button(
+            label="📥 Download QC Issues Report",
+            data=csv,
+            file_name=f"qc_issues_report_{date.today()}.csv",
+            mime="text/csv"
+        )
+    else:
+        st.success("✅ No QC issues detected! All data passes quality checks.")
     
     # Community Coverage Table with Planned vs Actual
     st.markdown('<div class="section-header"><h2 class="section-title">📋 Community Coverage Analysis</h2></div>', unsafe_allow_html=True)

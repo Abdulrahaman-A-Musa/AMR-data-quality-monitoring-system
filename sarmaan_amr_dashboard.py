@@ -8,7 +8,6 @@ import pandas as pd
 import streamlit as st
 import requests
 from io import BytesIO
-import plotly.express as px
 
 # ---------------- PAGE CONFIGURATION ----------------
 st.set_page_config(
@@ -970,44 +969,6 @@ def run_dashboard(df_main, df_mother, df_child):
             unsafe_allow_html=True
         )
     
-    # Geographic Coverage
-    st.markdown('<div class="section-header"><h2 class="section-title">🗺️ Geographic Coverage</h2></div>', unsafe_allow_html=True)
-    
-    col1, col2 = st.columns(2)
-    
-    with col1:
-        ward_col = find_column_with_keyword(df_main, 'Ward')
-        if ward_col and ward_col in df_main.columns:
-            ward_counts = df_main[ward_col].value_counts().reset_index()
-            ward_counts.columns = ['Ward', 'Submissions']
-            
-            fig = px.pie(
-                ward_counts,
-                values='Submissions',
-                names='Ward',
-                title='Submissions by Ward',
-                hole=0.4
-            )
-            fig.update_traces(textposition='inside', textinfo='percent+label')
-            st.plotly_chart(fig, use_container_width=True)
-    
-    with col2:
-        community_col = find_column_with_keyword(df_main, 'Community')
-        if community_col and community_col in df_main.columns:
-            community_counts = df_main[community_col].value_counts().head(10).reset_index()
-            community_counts.columns = ['Community', 'Submissions']
-            
-            fig = px.bar(
-                community_counts,
-                x='Submissions',
-                y='Community',
-                orientation='h',
-                title='Top 10 Communities by Submissions',
-                color='Submissions',
-                color_continuous_scale='Viridis'
-            )
-            st.plotly_chart(fig, use_container_width=True)
-    
     # Community Coverage Table with Planned vs Actual
     st.markdown('<div class="section-header"><h2 class="section-title">📋 Community Coverage Analysis</h2></div>', unsafe_allow_html=True)
     
@@ -1123,37 +1084,6 @@ def run_dashboard(df_main, df_mother, df_child):
             hide_index=True,
             height=400
         )
-        
-        # Download button
-        csv = display_coverage.to_csv(index=False)
-        st.download_button(
-            label="📥 Download Community Coverage Report",
-            data=csv,
-            file_name=f"community_coverage_{date.today()}.csv",
-            mime="text/csv"
-        )
-    
-    # Data Collection Timeline
-    st.markdown('<div class="section-header"><h2 class="section-title">📅 Data Collection Timeline</h2></div>', unsafe_allow_html=True)
-    
-    if 'start' in df_main.columns and not df_main.empty:
-        daily_counts = df_main.groupby(df_main['start'].dt.date).size().reset_index()
-        daily_counts.columns = ['Date', 'Submissions']
-        
-        fig = px.line(
-            daily_counts,
-            x='Date',
-            y='Submissions',
-            title='Daily Submission Trends',
-            markers=True
-        )
-        fig.update_layout(
-            height=400,
-            xaxis_title="Date",
-            yaxis_title="Number of Submissions",
-            hovermode='x unified'
-        )
-        st.plotly_chart(fig, use_container_width=True)
     
     # Rejected Submissions Detail
     if qc_metrics['validation_rejected'] > 0:

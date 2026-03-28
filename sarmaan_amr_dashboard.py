@@ -970,97 +970,6 @@ def run_dashboard(df_main, df_mother, df_child):
             unsafe_allow_html=True
         )
     
-    # Adverse Events Section
-    if qc_metrics['adverse_events'] > 0:
-        st.markdown('<div class="section-header"><h2 class="section-title">⚠️ Adverse Events Monitoring</h2></div>', unsafe_allow_html=True)
-        
-        st.markdown(
-            f"""
-            <div class="alert-box alert-warning">
-                <strong>⚠️ Adverse Events Reported:</strong> {qc_metrics['adverse_events']:,} cases
-                <br>
-                <small>Requires immediate attention from medical team</small>
-            </div>
-            """,
-            unsafe_allow_html=True
-        )
-        
-        # Show adverse events details if available
-        if not df_mother.empty:
-            ae_col = 'Q59. Did the child experience any adverse events?'
-            if ae_col in df_mother.columns:
-                ae_mothers = df_mother[df_mother[ae_col] == 'Yes']
-                
-                if not ae_mothers.empty:
-                    with st.expander("📋 View Adverse Events Details"):
-                        display_cols = ['Household ID', 'Mother ID', "Q51. Mother ${mother_id_001} name"]
-                        display_cols = [col for col in display_cols if col in ae_mothers.columns]
-                        st.dataframe(ae_mothers[display_cols], use_container_width=True)
-    
-    # Detailed Quality Issues
-    st.markdown('<div class="section-header"><h2 class="section-title">🔍 Detailed Quality Issues</h2></div>', unsafe_allow_html=True)
-    
-    issues_df = identify_data_quality_issues(df_main, df_mother, df_child)
-    
-    if not issues_df.empty:
-        for _, issue in issues_df.iterrows():
-            severity_class = {
-                'High': 'danger',
-                'Medium': 'warning',
-                'Low': 'info'
-            }.get(issue['severity'], 'info')
-            
-            st.markdown(
-                f"""
-                <div class="alert-box alert-{severity_class}">
-                    <strong>{issue['category']}:</strong> {issue['description']}
-                    <br>
-                    <span class="qc-badge qc-{severity_class}">Severity: {issue['severity']}</span>
-                </div>
-                """,
-                unsafe_allow_html=True
-            )
-    else:
-        st.success("✅ No major data quality issues detected!")
-    
-    # Enumerator Performance
-    st.markdown('<div class="section-header"><h2 class="section-title">👥 Enumerator Performance</h2></div>', unsafe_allow_html=True)
-    
-    username_col = find_column_with_keyword(df_main, 'username')
-    if username_col and username_col in df_main.columns:
-        enumerator_stats = df_main.groupby(username_col).agg({
-            '_uuid': 'count',
-            '_validation_status': lambda x: (x == 'Approved').sum()
-        }).reset_index()
-        enumerator_stats.columns = ['Enumerator', 'Total Submissions', 'Approved Submissions']
-        enumerator_stats['Approval Rate %'] = (
-            enumerator_stats['Approved Submissions'] / enumerator_stats['Total Submissions'] * 100
-        ).round(1)
-        enumerator_stats = enumerator_stats.sort_values('Total Submissions', ascending=False)
-        
-        # Create bar chart
-        fig = px.bar(
-            enumerator_stats.head(10),
-            x='Enumerator',
-            y='Total Submissions',
-            color='Approval Rate %',
-            title='Top 10 Enumerators by Submission Count',
-            color_continuous_scale='RdYlGn',
-            text='Total Submissions'
-        )
-        fig.update_traces(textposition='outside')
-        fig.update_layout(
-            height=400,
-            xaxis_title="Enumerator",
-            yaxis_title="Total Submissions",
-            showlegend=True
-        )
-        st.plotly_chart(fig, use_container_width=True)
-        
-        # Show table
-        with st.expander("📊 View Full Enumerator Statistics"):
-            st.dataframe(enumerator_stats, use_container_width=True, hide_index=True)
-    
     # Geographic Coverage
     st.markdown('<div class="section-header"><h2 class="section-title">🗺️ Geographic Coverage</h2></div>', unsafe_allow_html=True)
     
@@ -1251,6 +1160,7 @@ def run_dashboard(df_main, df_mother, df_child):
         st.markdown('<div class="section-header"><h2 class="section-title">❌ Rejected Submissions - Action Required</h2></div>', unsafe_allow_html=True)
         
         validation_col = '_validation_status'
+        username_col = find_column_with_keyword(df_main, 'username')
         if validation_col in df_main.columns:
             rejected_df = df_main[df_main[validation_col] == 'Not Approved'].copy()
             

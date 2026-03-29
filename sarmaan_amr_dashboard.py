@@ -21,7 +21,6 @@ st.set_page_config(
 
 # ---------------- ADMIN CREDENTIALS ----------------
 ADMIN_USERNAME = "admin"
-ADMIN_PASSWORD = "SARMAAN2024@AMR"
 
 # ---------------- CUSTOM CSS STYLING ----------------
 st.markdown(
@@ -67,32 +66,41 @@ st.markdown(
     
     /* Metric Cards */
     .metric-card {
-        background: white;
-        padding: 1.5rem;
-        border-radius: 12px;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-        border-left: 4px solid var(--primary-blue);
-        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+        padding: 1.2rem 1.5rem;
+        border-radius: 10px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+        border-left: 5px solid var(--primary-blue);
+        transition: all 0.3s ease;
+        text-align: center;
+        min-height: 100px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
     }
     
     .metric-card:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+        transform: translateY(-3px);
+        box-shadow: 0 6px 16px rgba(0,0,0,0.12);
     }
     
     .metric-value {
-        font-size: 2.5rem;
-        font-weight: 700;
+        font-size: 2.8rem;
+        font-weight: 800;
         color: var(--primary-blue);
-        margin: 0.5rem 0;
+        margin: 0;
+        line-height: 1;
+        letter-spacing: -1px;
     }
     
     .metric-label {
-        font-size: 0.95rem;
+        font-size: 0.75rem;
         color: #64748b;
         font-weight: 600;
         text-transform: uppercase;
         letter-spacing: 0.5px;
+        margin-top: 0.5rem;
     }
     
     .metric-delta {
@@ -247,10 +255,60 @@ st.markdown(
     #MainMenu {visibility: hidden;}
     footer {visibility: hidden;}
     
-    /* Responsive Design */
+    /* Responsive Design for Mobile */
     @media (max-width: 768px) {
-        .dashboard-title { font-size: 2rem; }
-        .metric-value { font-size: 2rem; }
+        .dashboard-title { 
+            font-size: 1.5rem; 
+        }
+        
+        .dashboard-subtitle {
+            font-size: 0.9rem;
+        }
+        
+        .metric-card {
+            padding: 0.8rem 1rem;
+            min-height: 80px;
+        }
+        
+        .metric-value { 
+            font-size: 2rem; 
+        }
+        
+        .metric-label {
+            font-size: 0.65rem;
+        }
+        
+        .section-header {
+            padding: 0.8rem 1rem;
+        }
+        
+        .section-title {
+            font-size: 1.2rem;
+        }
+        
+        .dashboard-header {
+            padding: 1.5rem;
+        }
+        
+        /* Make tables scroll horizontally on mobile */
+        .dataframe {
+            overflow-x: auto;
+        }
+    }
+    
+    @media (max-width: 480px) {
+        .dashboard-title { 
+            font-size: 1.2rem; 
+        }
+        
+        .metric-value { 
+            font-size: 1.8rem; 
+        }
+        
+        .metric-card {
+            padding: 0.6rem 0.8rem;
+            min-height: 70px;
+        }
     }
     </style>
     """,
@@ -468,39 +526,80 @@ except Exception as e:
     COMMUNITY_PLANNED = {}
 
 # ---------------- LGA-BASED LOGIN CREDENTIALS ----------------
-# Format: {lga_username: (password, lga_name, [wards_list])}
+# Format: {lga_username: lga_name}
+# Usernames are case-insensitive (will be converted to lowercase)
 LGA_CREDENTIALS = {
-    "bade": ("Bade@2024", "Bade"),
-    "bursari": ("Bursari@2024", "Bursari"),
-    "damaturu": ("Damaturu@2024", "Damaturu"),
-    "fika": ("Fika@2024", "Fika"),
-    "fune": ("Fune@2024", "Fune"),
-    "geidam": ("Geidam@2024", "Geidam"),
-    "gujba": ("Gujba@2024", "Gujba"),
-    "gulani": ("Gulani@2024", "Gulani"),
-    "jakusko": ("Jakusko@2024", "Jakusko"),
-    "karasuwa": ("Karasuwa@2024", "Karasuwa"),
-    "machina": ("Machina@2024", "Machina"),
-    "nangere": ("Nangere@2024", "Nangere"),
-    "nguru": ("Nguru@2024", "Nguru"),
-    "potiskum": ("Potiskum@2024", "Potiskum"),
-    "tarmuwa": ("Tarmuwa@2024", "Tarmuwa"),
-    "yunusari": ("Yunusari@2024", "Yunusari"),
-    "yusufari": ("Yusufari@2024", "Yusufari"),
+    "bade": "Bade",
+    "bursari": "Bursari",
+    "damaturu": "Damaturu",
+    "fika": "Fika",
+    "fune": "Fune",
+    "geidam": "Geidam",
+    "gujba": "Gujba",
+    "gulani": "Gulani",
+    "jakusko": "Jakusko",
+    "karasuwa": "Karasuwa",
+    "machina": "Machina",
+    "nangere": "Nangere",
+    "nguru": "Nguru",
+    "potiskum": "Potiskum",
+    "tarmuwa": "Tarmuwa",
+    "yunusari": "Yunusari",
+    "yusufari": "Yusufari",
 }
 
 # ---------------- DATA LOADING FUNCTION ----------------
 @st.cache_data(show_spinner="📊 Loading SARMAAN II AMR data...", ttl=600)
 def load_data(force_refresh=False):
-    """Load data from KoboToolbox API"""
+    """Load data from KoboToolbox export URL"""
     try:
-        # Load data from KoboToolbox API
+        # Load data directly from the export URL (no authentication needed)
         response = requests.get(DATA_URL, timeout=60)
         response.raise_for_status()
         excel_file = BytesIO(response.content)
         
         # Load all sheets
         data_dict = pd.read_excel(excel_file, sheet_name=None)
+        
+        df_main = data_dict.get(MAIN_SHEET, pd.DataFrame())
+        df_mother = data_dict.get(MOTHER_SHEET, pd.DataFrame())
+        df_child = data_dict.get(CHILD_SHEET, pd.DataFrame())
+        
+        # Check if main dataframe is empty
+        if df_main.empty:
+            st.warning(f"⚠️ Sheet '{MAIN_SHEET}' not found or is empty. Available sheets: {list(data_dict.keys())}")
+        
+        # Data cleaning and preprocessing
+        if not df_main.empty:
+            # Convert date columns
+            date_cols = ['start', 'end', 'Date of Consent', '_submission_time']
+            for col in date_cols:
+                if col in df_main.columns:
+                    df_main[col] = pd.to_datetime(df_main[col], errors='coerce')
+            
+            # Clean text columns
+            text_cols = ['Q2. State', 'Q3. Local Government Area', 'Q4. Ward', 
+                        'Q5. Community Name', 'username']
+            for col in text_cols:
+                if col in df_main.columns:
+                    df_main[col] = df_main[col].astype(str).str.strip()
+        
+        return df_main, df_mother, df_child
+    
+    except requests.exceptions.RequestException as e:
+        st.error(f"❌ Network error loading data: {str(e)}")
+        st.info("💡 **Troubleshooting Tips:**\n"
+                "1. Check your internet connection\n"
+                "2. Verify the DATA_URL is correct in secrets.toml\n"
+                "3. Ensure the export URL is publicly accessible")
+        return pd.DataFrame(), pd.DataFrame(), pd.DataFrame()
+    except Exception as e:
+        st.error(f"❌ Error loading data: {str(e)}")
+        st.info("💡 **Possible Issues:**\n"
+                "1. Invalid Excel file format\n"
+                "2. Sheet names don't match (expected: 'SARMAAN II AMR YOBE STATE', 'mother_information', 'child_info')\n"
+                "3. Check that the export URL is correct")
+        return pd.DataFrame(), pd.DataFrame(), pd.DataFrame()
         
         df_main = data_dict.get(MAIN_SHEET, pd.DataFrame())
         df_mother = data_dict.get(MOTHER_SHEET, pd.DataFrame())
@@ -885,11 +984,10 @@ def login_page():
     
     with col2:
         st.markdown('<div class="login-container">', unsafe_allow_html=True)
-        st.markdown('<h2 class="login-title">🔐 Secure Login</h2>', unsafe_allow_html=True)
+        st.markdown('<h2 class="login-title">🔐 Dashboard Login</h2>', unsafe_allow_html=True)
         
         with st.form("login_form"):
             username = st.text_input("Username", placeholder="Enter your username")
-            password = st.text_input("Password", type="password", placeholder="Enter your password")
             
             col_a, col_b = st.columns(2)
             with col_a:
@@ -898,8 +996,10 @@ def login_page():
                 help_button = st.form_submit_button("❓ Help", use_container_width=True)
             
             if login_button:
+                if not username:
+                    st.error("❌ Please enter a username")
                 # Check admin login
-                if username == ADMIN_USERNAME and password == ADMIN_PASSWORD:
+                elif username.lower() == "admin":
                     st.session_state.logged_in = True
                     st.session_state.current_user = username
                     st.session_state.user_role = 'admin'
@@ -908,30 +1008,33 @@ def login_page():
                 
                 # Check LGA login
                 elif username.lower() in LGA_CREDENTIALS:
-                    pwd, lga_name = LGA_CREDENTIALS[username.lower()]
-                    if password == pwd:
-                        st.session_state.logged_in = True
-                        st.session_state.current_user = username
-                        st.session_state.user_role = 'lga'
-                        st.session_state.selected_lga = lga_name
-                        st.success(f"✅ Login successful! Welcome {lga_name} LGA supervisor")
-                        st.rerun()
-                    else:
-                        st.error("❌ Invalid password")
+                    lga_name = LGA_CREDENTIALS[username.lower()]
+                    st.session_state.logged_in = True
+                    st.session_state.current_user = username
+                    st.session_state.user_role = 'lga'
+                    st.session_state.selected_lga = lga_name
+                    st.success(f"✅ Login successful! Welcome {lga_name} LGA supervisor")
+                    st.rerun()
                 else:
-                    st.error("❌ Invalid username or password")
+                    st.error("❌ Invalid username. Please check and try again.")
             
             if help_button:
                 st.info("""
                 **Login Instructions:**
-                - **LGA Supervisors**: Use your LGA username (e.g., 'potiskum', 'bade') and password
-                - **Admin**: Use admin credentials to view all data
                 
-                **Example LGA Logins:**
-                - Username: potiskum, Password: Potiskum@2024
-                - Username: bade, Password: Bade@2024
+                **For Admin Access:**
+                - Username: `admin`
                 
-                Contact your M&E coordinator for login issues
+                **For LGA Supervisors:**
+                - Username: Your LGA name (lowercase)
+                - Examples: `potiskum`, `bade`, `damaturu`, `fika`, etc.
+                
+                **Available LGAs:**
+                Bade, Bursari, Damaturu, Fika, Fune, Geidam, Gujba, Gulani, 
+                Jakusko, Karasuwa, Machina, Nangere, Nguru, Potiskum, 
+                Tarmuwa, Yunusari, Yusufari
+                
+                📞 Contact your M&E coordinator for login issues
                 """)
         
         st.markdown('</div>', unsafe_allow_html=True)
@@ -974,7 +1077,7 @@ def run_dashboard(df_main, df_mother, df_child):
         f"""
         <div class="dashboard-header">
             <h1 class="dashboard-title">🏥 SARMAAN II AMR Dashboard</h1>
-            <p class="dashboard-subtitle">Yobe State - Quality Control & Monitoring System</p>
+            <p class="dashboard-subtitle">Sokoto State - Quality Control & Monitoring System</p>
             <div class="user-badge">👤 {user_role_display}</div>
         </div>
         """,
@@ -1060,14 +1163,21 @@ def run_dashboard(df_main, df_mother, df_child):
     # KPI Section
     st.markdown('<div class="section-header"><h2 class="section-title">📊 Key Performance Indicators</h2></div>', unsafe_allow_html=True)
     
-    col1, col2, col3, col4 = st.columns(4)
+    # Calculate the metrics from filtered data
+    total_submissions = len(df_main)
+    lgas_covered = df_main['Q3. Local Government Area'].nunique() if 'Q3. Local Government Area' in df_main.columns else 0
+    wards_covered = df_main['Q4. Ward'].nunique() if 'Q4. Ward' in df_main.columns else 0
+    communities_covered = df_main['Q5. Community Name'].nunique() if 'Q5. Community Name' in df_main.columns else 0
+    research_assistants = df_main['username'].nunique() if 'username' in df_main.columns else 0
+    
+    col1, col2, col3, col4, col5 = st.columns(5)
     
     with col1:
         st.markdown(
             f"""
-            <div class="metric-card">
-                <div class="metric-label">🏠 Total Households</div>
-                <div class="metric-value">{qc_metrics['total_households']:,}</div>
+            <div class="metric-card" style="border-left-color: #3b82f6;">
+                <div class="metric-value" style="color: #3b82f6;">{total_submissions}</div>
+                <div class="metric-label">Total Submissions</div>
             </div>
             """,
             unsafe_allow_html=True
@@ -1076,9 +1186,9 @@ def run_dashboard(df_main, df_mother, df_child):
     with col2:
         st.markdown(
             f"""
-            <div class="metric-card">
-                <div class="metric-label">👩 Total Mothers</div>
-                <div class="metric-value">{qc_metrics['total_mothers']:,}</div>
+            <div class="metric-card" style="border-left-color: #10b981;">
+                <div class="metric-value" style="color: #10b981;">{lgas_covered}</div>
+                <div class="metric-label">LGAs Covered</div>
             </div>
             """,
             unsafe_allow_html=True
@@ -1087,9 +1197,9 @@ def run_dashboard(df_main, df_mother, df_child):
     with col3:
         st.markdown(
             f"""
-            <div class="metric-card">
-                <div class="metric-label">👶 Total Children</div>
-                <div class="metric-value">{qc_metrics['total_children']:,}</div>
+            <div class="metric-card" style="border-left-color: #14b8a6;">
+                <div class="metric-value" style="color: #14b8a6;">{wards_covered}</div>
+                <div class="metric-label">Wards Covered</div>
             </div>
             """,
             unsafe_allow_html=True
@@ -1098,9 +1208,20 @@ def run_dashboard(df_main, df_mother, df_child):
     with col4:
         st.markdown(
             f"""
-            <div class="metric-card">
-                <div class="metric-label">💊 AZM Received</div>
-                <div class="metric-value">{qc_metrics['azm_received']:,}</div>
+            <div class="metric-card" style="border-left-color: #f97316;">
+                <div class="metric-value" style="color: #f97316;">{communities_covered}</div>
+                <div class="metric-label">Communities</div>
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
+    
+    with col5:
+        st.markdown(
+            f"""
+            <div class="metric-card" style="border-left-color: #8b5cf6;">
+                <div class="metric-value" style="color: #8b5cf6;">{research_assistants}</div>
+                <div class="metric-label">Enumerators</div>
             </div>
             """,
             unsafe_allow_html=True
@@ -1147,152 +1268,7 @@ def run_dashboard(df_main, df_mother, df_child):
             unsafe_allow_html=True
         )
     
-    # Data Quality Issues
-    st.markdown('<div class="section-header"><h2 class="section-title">🚨 Data Quality Alerts</h2></div>', unsafe_allow_html=True)
-    
-    col1, col2, col3 = st.columns(3)
-    
-    with col1:
-        severity = "danger" if qc_metrics['duplicate_households'] > 0 else "success"
-        st.markdown(
-            f"""
-            <div class="alert-box alert-{severity}">
-                <strong>🏠 Duplicate Households:</strong> {qc_metrics['duplicate_households']:,}
-            </div>
-            """,
-            unsafe_allow_html=True
-        )
-    
-    with col2:
-        severity = "danger" if qc_metrics['duplicate_mothers'] > 0 else "success"
-        st.markdown(
-            f"""
-            <div class="alert-box alert-{severity}">
-                <strong>👩 Duplicate Mothers:</strong> {qc_metrics['duplicate_mothers']:,}
-            </div>
-            """,
-            unsafe_allow_html=True
-        )
-    
-    with col3:
-        severity = "danger" if qc_metrics['duplicate_children'] > 0 else "success"
-        st.markdown(
-            f"""
-            <div class="alert-box alert-{severity}">
-                <strong>👶 Duplicate Children:</strong> {qc_metrics['duplicate_children']:,}
-            </div>
-            """,
-            unsafe_allow_html=True
-        )
-    
-    # Quality Control Checks Section
-    st.markdown('<div class="section-header"><h2 class="section-title">🔍 Quality Control Checks</h2></div>', unsafe_allow_html=True)
-    
-    # Perform comprehensive QC checks
-    qc_issues_df = perform_comprehensive_qc_checks(df_main, df_mother, df_child)
-    
-    # Calculate QC metrics
-    total_issues = len(qc_issues_df)
-    age_inconsistencies = len(qc_issues_df[qc_issues_df['Issue Type'] == 'Age Inconsistency'])
-    duplicates = qc_metrics['duplicate_households'] + qc_metrics['duplicate_mothers'] + qc_metrics['duplicate_children']
-    other_issues = total_issues - age_inconsistencies
-    
-    # Display QC summary metrics
-    col1, col2, col3, col4 = st.columns(4)
-    
-    with col1:
-        st.metric("Total Issues Found", f"{total_issues:,}")
-    with col2:
-        st.metric("Age Inconsistencies", f"{age_inconsistencies:,}")
-    with col3:
-        st.metric("Duplicates", f"{duplicates:,}")
-    with col4:
-        st.metric("Other Issues", f"{other_issues:,}")
-    
-    # Distribution of QC Issues Chart
-    if not qc_issues_df.empty:
-        st.markdown("#### Distribution of QC Issues")
-        
-        issue_counts = qc_issues_df['Issue Type'].value_counts().reset_index()
-        issue_counts.columns = ['Issue Type', 'Count']
-        
-        fig = px.bar(
-            issue_counts,
-            x='Issue Type',
-            y='Count',
-            title='',
-            color='Count',
-            color_continuous_scale='Reds',
-            text='Count'
-        )
-        fig.update_traces(textposition='outside')
-        fig.update_layout(
-            height=400,
-            xaxis_title="Issue Type",
-            yaxis_title="Count",
-            xaxis_tickangle=-45,
-            showlegend=False
-        )
-        st.plotly_chart(fig, use_container_width=True)
-        
-        # Detailed QC Issues Table
-        st.markdown("### 📋 Detailed QC Issues Table")
-        st.markdown(f"**{total_issues:,}** issues flagged across LGA, Ward, and Community")
-        
-        # Add filter expander
-        with st.expander("🔍 Filter QC Issues (Optional)"):
-            filter_col1, filter_col2, filter_col3 = st.columns(3)
-            
-            with filter_col1:
-                selected_lga_filter = st.multiselect(
-                    "Filter by LGA",
-                    options=sorted(qc_issues_df['LGA'].unique().tolist()),
-                    default=None
-                )
-            
-            with filter_col2:
-                selected_issue_type = st.multiselect(
-                    "Filter by Issue Type",
-                    options=sorted(qc_issues_df['Issue Type'].unique().tolist()),
-                    default=None
-                )
-            
-            with filter_col3:
-                selected_validation = st.multiselect(
-                    "Filter by Validation Status",
-                    options=sorted(qc_issues_df['Validation Status'].dropna().unique().tolist()),
-                    default=None
-                )
-        
-        # Apply filters
-        filtered_qc_df = qc_issues_df.copy()
-        if selected_lga_filter:
-            filtered_qc_df = filtered_qc_df[filtered_qc_df['LGA'].isin(selected_lga_filter)]
-        if selected_issue_type:
-            filtered_qc_df = filtered_qc_df[filtered_qc_df['Issue Type'].isin(selected_issue_type)]
-        if selected_validation:
-            filtered_qc_df = filtered_qc_df[filtered_qc_df['Validation Status'].isin(selected_validation)]
-        
-        # Display filtered table
-        st.dataframe(
-            filtered_qc_df,
-            use_container_width=True,
-            hide_index=True,
-            height=400
-        )
-        
-        # Download button for QC issues
-        csv = filtered_qc_df.to_csv(index=False)
-        st.download_button(
-            label="📥 Download QC Issues Report",
-            data=csv,
-            file_name=f"qc_issues_report_{date.today()}.csv",
-            mime="text/csv"
-        )
-    else:
-        st.success("✅ No QC issues detected! All data passes quality checks.")
-    
-    # Community Coverage Table with Planned vs Actual
+    # Community Coverage Analysis - Moved here after Validation Status
     st.markdown('<div class="section-header"><h2 class="section-title">📋 Community Coverage Analysis</h2></div>', unsafe_allow_html=True)
     
     community_col = find_column_with_keyword(df_main, 'Community')
@@ -1408,6 +1384,96 @@ def run_dashboard(df_main, df_mother, df_child):
             height=400
         )
     
+    # Data Quality Issues
+    st.markdown('<div class="section-header"><h2 class="section-title">🚨 Data Quality Alerts</h2></div>', unsafe_allow_html=True)
+    
+    col1, col2, col3 = st.columns(3)
+    
+    with col1:
+        severity = "danger" if qc_metrics['duplicate_households'] > 0 else "success"
+        st.markdown(
+            f"""
+            <div class="alert-box alert-{severity}">
+                <strong>🏠 Duplicate Households:</strong> {qc_metrics['duplicate_households']:,}
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
+    
+    with col2:
+        severity = "danger" if qc_metrics['duplicate_mothers'] > 0 else "success"
+        st.markdown(
+            f"""
+            <div class="alert-box alert-{severity}">
+                <strong>👩 Duplicate Mothers:</strong> {qc_metrics['duplicate_mothers']:,}
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
+    
+    with col3:
+        severity = "danger" if qc_metrics['duplicate_children'] > 0 else "success"
+        st.markdown(
+            f"""
+            <div class="alert-box alert-{severity}">
+                <strong>👶 Duplicate Children:</strong> {qc_metrics['duplicate_children']:,}
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
+    
+    # Quality Control Checks Section
+    st.markdown('<div class="section-header"><h2 class="section-title">🔍 Quality Control Checks</h2></div>', unsafe_allow_html=True)
+    
+    # Perform comprehensive QC checks
+    qc_issues_df = perform_comprehensive_qc_checks(df_main, df_mother, df_child)
+    
+    # Calculate QC metrics
+    total_issues = len(qc_issues_df)
+    age_inconsistencies = len(qc_issues_df[qc_issues_df['Issue Type'] == 'Age Inconsistency'])
+    duplicates = qc_metrics['duplicate_households'] + qc_metrics['duplicate_mothers'] + qc_metrics['duplicate_children']
+    other_issues = total_issues - age_inconsistencies
+    
+    # Display QC summary metrics
+    col1, col2, col3, col4 = st.columns(4)
+    
+    with col1:
+        st.metric("Total Issues Found", f"{total_issues:,}")
+    with col2:
+        st.metric("Age Inconsistencies", f"{age_inconsistencies:,}")
+    with col3:
+        st.metric("Duplicates", f"{duplicates:,}")
+    with col4:
+        st.metric("Other Issues", f"{other_issues:,}")
+    
+    # Distribution of QC Issues Chart
+    if not qc_issues_df.empty:
+        st.markdown("#### Distribution of QC Issues")
+        
+        issue_counts = qc_issues_df['Issue Type'].value_counts().reset_index()
+        issue_counts.columns = ['Issue Type', 'Count']
+        
+        fig = px.bar(
+            issue_counts,
+            x='Issue Type',
+            y='Count',
+            title='',
+            color='Count',
+            color_continuous_scale='Reds',
+            text='Count'
+        )
+        fig.update_traces(textposition='outside')
+        fig.update_layout(
+            height=400,
+            xaxis_title="Issue Type",
+            yaxis_title="Count",
+            xaxis_tickangle=-45,
+            showlegend=False
+        )
+        st.plotly_chart(fig, use_container_width=True)
+    else:
+        st.success("✅ No QC issues detected! All data passes quality checks.")
+    
     # Rejected Submissions Detail
     if qc_metrics['validation_rejected'] > 0:
         st.markdown('<div class="section-header"><h2 class="section-title">❌ Rejected Submissions - Action Required</h2></div>', unsafe_allow_html=True)
@@ -1438,6 +1504,53 @@ def run_dashboard(df_main, df_mother, df_child):
                     unsafe_allow_html=True
                 )
     
+    # Detailed QC Issues Table - Moved to the end
+    if not qc_issues_df.empty:
+        st.markdown('<div class="section-header"><h2 class="section-title">📋 Detailed QC Issues Table</h2></div>', unsafe_allow_html=True)
+        st.markdown(f"**{total_issues:,}** issues flagged across LGA, Ward, and Community")
+        
+        # Add filter expander
+        with st.expander("🔍 Filter QC Issues (Optional)"):
+            filter_col1, filter_col2, filter_col3 = st.columns(3)
+            
+            with filter_col1:
+                selected_lga_filter = st.multiselect(
+                    "Filter by LGA",
+                    options=sorted(qc_issues_df['LGA'].unique().tolist()),
+                    default=None
+                )
+            
+            with filter_col2:
+                selected_issue_type = st.multiselect(
+                    "Filter by Issue Type",
+                    options=sorted(qc_issues_df['Issue Type'].unique().tolist()),
+                    default=None
+                )
+            
+            with filter_col3:
+                selected_validation = st.multiselect(
+                    "Filter by Validation Status",
+                    options=sorted(qc_issues_df['Validation Status'].dropna().unique().tolist()),
+                    default=None
+                )
+        
+        # Apply filters
+        filtered_qc_df = qc_issues_df.copy()
+        if selected_lga_filter:
+            filtered_qc_df = filtered_qc_df[filtered_qc_df['LGA'].isin(selected_lga_filter)]
+        if selected_issue_type:
+            filtered_qc_df = filtered_qc_df[filtered_qc_df['Issue Type'].isin(selected_issue_type)]
+        if selected_validation:
+            filtered_qc_df = filtered_qc_df[filtered_qc_df['Validation Status'].isin(selected_validation)]
+        
+        # Display filtered table
+        st.dataframe(
+            filtered_qc_df,
+            use_container_width=True,
+            hide_index=True,
+            height=400
+        )
+    
     # Footer
     st.markdown("---")
     st.markdown(
@@ -1446,7 +1559,6 @@ def run_dashboard(df_main, df_mother, df_child):
             <p><strong>SARMAAN II - Safety and Antimicrobial Resistance of Mass Administration of Azithromycin</strong></p>
             <p>Near real-time data quality monitoring system for AMR</p>
             <p style="font-size: 0.85rem; margin-top: 1rem;">
-                Dashboard Version 2.0 | Last Updated: December 2025
             </p>
         </div>
         """,

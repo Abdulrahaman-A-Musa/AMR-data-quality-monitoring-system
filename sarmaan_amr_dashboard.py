@@ -1,5 +1,5 @@
 # ================================
-# SARMAAN II AMR YOBE STATE - QC DASHBOARD
+# SARMAAN II AMR SOKOTO STATE - QC DASHBOARD
 # Advanced Quality Control Dashboard for Antimicrobial Resistance Study
 # ================================
 
@@ -13,9 +13,9 @@ import plotly.graph_objects as go
 
 # ---------------- PAGE CONFIGURATION ----------------
 st.set_page_config(
-    page_title="SARMAAN II AMR Dashboard - Yobe State",
+    page_title="SARMAAN II AMR Dashboard - Sokoto State",
     layout="wide",
-    initial_sidebar_state="expanded",
+    initial_sidebar_state="auto",  # Auto-collapse on mobile
     page_icon="🏥"
 )
 
@@ -40,6 +40,12 @@ st.markdown(
     
     /* Global Styles */
     .main { background-color: var(--bg-light); }
+    
+    /* Ensure content fits mobile screens */
+    * {
+        box-sizing: border-box;
+        max-width: 100%;
+    }
     
     /* Header Styles */
     .dashboard-header {
@@ -257,6 +263,13 @@ st.markdown(
     
     /* Responsive Design for Mobile */
     @media (max-width: 768px) {
+        /* Reduce padding and margins */
+        .main .block-container {
+            padding-left: 1rem !important;
+            padding-right: 1rem !important;
+            padding-top: 1rem !important;
+        }
+        
         .dashboard-title { 
             font-size: 1.5rem; 
         }
@@ -266,12 +279,13 @@ st.markdown(
         }
         
         .metric-card {
-            padding: 0.8rem 1rem;
+            padding: 0.8rem 0.5rem;
             min-height: 80px;
+            margin-bottom: 0.5rem;
         }
         
         .metric-value { 
-            font-size: 2rem; 
+            font-size: 1.8rem; 
         }
         
         .metric-label {
@@ -280,34 +294,138 @@ st.markdown(
         
         .section-header {
             padding: 0.8rem 1rem;
+            margin: 1rem 0 0.5rem 0;
         }
         
         .section-title {
-            font-size: 1.2rem;
+            font-size: 1.1rem;
         }
         
         .dashboard-header {
-            padding: 1.5rem;
+            padding: 1.2rem;
+            margin-bottom: 1rem;
         }
         
         /* Make tables scroll horizontally on mobile */
         .dataframe {
             overflow-x: auto;
+            font-size: 0.85rem;
+        }
+        
+        /* Streamlit columns stack on mobile */
+        [data-testid="column"] {
+            width: 100% !important;
+            flex: 1 1 100% !important;
+            min-width: 100% !important;
+        }
+        
+        /* Better spacing for metrics */
+        [data-testid="stMetricValue"] {
+            font-size: 1.5rem !important;
+        }
+        
+        [data-testid="stMetricLabel"] {
+            font-size: 0.8rem !important;
+        }
+        
+        /* Login container on mobile */
+        .login-container {
+            margin: 2rem auto;
+            padding: 1.5rem;
+        }
+        
+        .login-title {
+            font-size: 1.5rem;
+        }
+        
+        /* Sidebar on mobile */
+        .stSidebar {
+            width: 100% !important;
+        }
+        
+        /* Charts on mobile */
+        .js-plotly-plot {
+            width: 100% !important;
+        }
+        
+        /* Button full width on mobile */
+        .stButton > button {
+            width: 100%;
+            margin-bottom: 0.5rem;
         }
     }
     
     @media (max-width: 480px) {
+        /* Extra small phones */
+        .main .block-container {
+            padding-left: 0.5rem !important;
+            padding-right: 0.5rem !important;
+        }
+        
         .dashboard-title { 
             font-size: 1.2rem; 
         }
         
+        .dashboard-subtitle {
+            font-size: 0.75rem;
+        }
+        
         .metric-value { 
-            font-size: 1.8rem; 
+            font-size: 1.5rem; 
+        }
+        
+        .metric-label {
+            font-size: 0.6rem;
         }
         
         .metric-card {
-            padding: 0.6rem 0.8rem;
+            padding: 0.6rem 0.4rem;
             min-height: 70px;
+        }
+        
+        .section-title {
+            font-size: 1rem;
+        }
+        
+        .dashboard-header {
+            padding: 1rem;
+            border-radius: 10px;
+        }
+        
+        /* Tables with smaller text */
+        .dataframe {
+            font-size: 0.75rem;
+        }
+        
+        /* Form inputs full width */
+        .stTextInput > div > div > input {
+            font-size: 1rem;
+        }
+        
+        /* Selectbox full width */
+        .stSelectbox, .stMultiSelect {
+            width: 100%;
+        }
+        
+        /* Expander on mobile */
+        .streamlit-expanderHeader {
+            font-size: 0.9rem;
+        }
+    }
+    
+    /* Landscape phones */
+    @media (max-width: 900px) and (orientation: landscape) {
+        .dashboard-header {
+            padding: 1rem;
+        }
+        
+        .metric-card {
+            min-height: 70px;
+            padding: 0.6rem;
+        }
+        
+        .metric-value {
+            font-size: 1.6rem;
         }
     }
     </style>
@@ -316,15 +434,14 @@ st.markdown(
 )
 
 # ---------------- DATA SOURCE ----------------
-# Replace with your actual KoboToolbox export URL
 DATA_URL = st.secrets.get("DATA_URL", "")
-MAIN_SHEET = "SARMAAN II AMR YOBE STATE"
+MAIN_SHEET = "SARMAAN II C3 SOKOTO AMR TRA..."
 MOTHER_SHEET = "mother_information"
 CHILD_SHEET = "child_info"
 
 # ---------------- SESSION STATE INITIALIZATION ----------------
 # Auto-login as Admin (set to False to enable login page)
-AUTO_LOGIN_ADMIN = True
+AUTO_LOGIN_ADMIN = False
 
 if 'logged_in' not in st.session_state:
     st.session_state.logged_in = AUTO_LOGIN_ADMIN
@@ -339,176 +456,237 @@ if 'selected_lga' not in st.session_state:
 
 # ---------------- COMMUNITY MAPPING DATA ----------------
 COMMUNITY_MAP_DATA = """state,lga,ward,Community,communitycode,Planned_Community
-Yobe,Bade,Dagona,Zango Loko,C1-110111,14
-Yobe,Bade,Dagona,Zango Company,C1-110112,44
-Yobe,Bade,Katuzu,Kaikabo,C1-110121,25
-Yobe,Bade,Katuzu,Kara,C1-110122,41
-Yobe,Bade,Lawan Fannami,Babuje,C1-110131,21
-Yobe,Bade,Lawan Fannami,Bagar Dankoli,C1-110132,11
-Yobe,Bade,Sabon Gari,Asibitin Agana,C1-110141,26
-Yobe,Bade,Sabon Gari,Kabalan Kara Arfo,C1-110142,21
-Yobe,Bade,Sarkin Hausawa,Sarkin Ruwa B,C1-110151,9
-Yobe,Bade,Sarkin Hausawa,Tsangayan Alhaji Usman Idris,C1-110152,43
-Yobe,Bursari,Danani/Lawanti,Ganawajiri Alhaji,C1-110211,9
-Yobe,Bursari,Danani/Lawanti,Matti Umarari,C1-110212,13
-Yobe,Bursari,Dapchi,Bulama Adamu Kellumi Gundumari,C1-110221,29
-Yobe,Bursari,Dapchi,Bulama Burah,C1-110222,42
-Yobe,Bursari,Guji/Metalari,Ajiri Goniri,C1-110231,22
-Yobe,Bursari,Guji/Metalari,Karasuwa,C1-110232,15
-Yobe,Bursari,Jawa Garun Dole,Garin Alkali Bamusu,C1-110241,53
-Yobe,Bursari,Jawa Garun Dole,Garun Dole Lawanti,C1-110242,35
-Yobe,Bursari,Juluri/Damnawa,G Mai Njiru,C1-110251,20
-Yobe,Bursari,Juluri/Damnawa,Gamsa Goniri,C1-110252,18
-Yobe,Damaturu,Bindigari/Pawari,Alimarami Ext North,C1-110311,34
-Yobe,Damaturu,Bindigari/Pawari,Bra Bra West,C1-110312,17
-Yobe,Damaturu,Damakasu,Kimeri Modubulama Bindi,C1-110321,15
-Yobe,Damaturu,Damakasu,Maji Kauri,C1-110322,21
-Yobe,Damaturu,Kalallawa/Gabai,Kalallawa B Ahmad,C1-110331,17
-Yobe,Damaturu,Kalallawa/Gabai,Kangol,C1-110332,21
-Yobe,Damaturu,Kukareta/Warsala,Bulama Mustapha Tanko,C1-110341,13
-Yobe,Damaturu,Kukareta/Warsala,Bulama Ya Kana,C1-110342,22
-Yobe,Damaturu,Nayinawa,Abbari Byepass,C1-110351,57
-Yobe,Damaturu,Nayinawa,Abbari Pri Sch Area,C1-110352,39
-Yobe,Fika,Gadaka/Shembire,Anguwan Ibrahim Allahure,C1-110411,14
-Yobe,Fika,Gadaka/Shembire,Dala Koe,C1-110412,30
-Yobe,Fika,Garu,Garu,C1-110421,18
-Yobe,Fika,Garu,Seminti Anguwan Malam Buba,C1-110422,27
-Yobe,Fika,Gudi Dozi,Lawe Shula,C1-110431,33
-Yobe,Fika,Gudi Dozi,Umaru Dari,C1-110432,9
-Yobe,Fika,Janga,Damshi,C1-110441,20
-Yobe,Fika,Janga,Gashaka Ung Sa Adu,C1-110442,24
-Yobe,Fika,Ngalda Dumbulwa,Unguwan Madu,C1-110451,59
-Yobe,Fika,Ngalda Dumbulwa,Dambuna Mtn,C1-110452,20
-Yobe,Fune,Ngelzarma B,Abakire Katsuwa,C1-110511,55
-Yobe,Fune,Ngelzarma B,Bulawaini,C1-110512,23
-Yobe,Fune,Daura A,Bijawa Yamma,C1-110521,24
-Yobe,Fune,Daura A,Bulanguwa,C1-110522,36
-Yobe,Fune,Daura B,Anguwan Gamji,C1-110531,17
-Yobe,Fune,Daura B,Dankara,C1-110532,12
-Yobe,Fune,Mashio,Shanga B Saidu,C1-110541,16
-Yobe,Fune,Mashio,Dumbulwa Jauro Adamu,C1-110542,37
-Yobe,Fune,Kolere/Kafaje,Balangu,C1-110551,15
-Yobe,Fune,Kolere/Kafaje,Balarabe Ali,C1-110552,22
-Yobe,Geidam,Asheikiri,Alhaji Goggo,C1-110611,20
-Yobe,Geidam,Asheikiri,Bulama Isiyaku,C1-110612,21
-Yobe,Geidam,Balle,Fulatari B Marawa,C1-110621,52
-Yobe,Geidam,Balle,Kelluri B Bukar,C1-110622,27
-Yobe,Geidam,Jororo,Kalgeri Hausari,C1-110631,36
-Yobe,Geidam,Jororo,Kalari,C1-110632,21
-Yobe,Geidam,Ma'Anna,Bukar Ganari,C1-110641,11
-Yobe,Geidam,Ma'Anna,Karamma,C1-110642,11
-Yobe,Geidam,Kolori,Bulama Miko,C1-110651,35
-Yobe,Geidam,Kolori,Fulatari Engine,C1-110652,23
-Yobe,Gujba,Wagir,Jauro Guru,C1-110711,15
-Yobe,Gujba,Wagir,Ngaurawa,C1-110712,44
-Yobe,Gujba,Buni Yadi,Alhaji Haruna Sarkin Aska,C1-110721,20
-Yobe,Gujba,Buni Yadi,Audu Gazari,C1-110722,18
-Yobe,Gujba,Mutai,Bandila,C1-110731,18
-Yobe,Gujba,Mutai,Dingare,C1-110732,14
-Yobe,Gujba,Buni Gari,Buni West,C1-110741,28
-Yobe,Gujba,Buni Gari,Bulama Yaga,C1-110742,17
-Yobe,Gujba,Gujba,Bulama Shettima,C1-110751,36
-Yobe,Gujba,Gujba,Bungai,C1-110752,46
-Yobe,Gulani,Bara,Gala Chiroma B,C1-110811,50
-Yobe,Gulani,Bara,Jauro Jao,C1-110812,10
-Yobe,Gulani,Bularafa,Shishiwaji,C1-110821,33
-Yobe,Gulani,Bularafa,Umar Mai Kwariya,C1-110822,28
-Yobe,Gulani,Bumsa,Garagari,C1-110831,16
-Yobe,Gulani,Bumsa,Gargari Sabo,C1-110832,34
-Yobe,Gulani,Dokshi,Doarga,C1-110841,15
-Yobe,Gulani,Dokshi,Dokshi Anguwan Balari,C1-110842,8
-Yobe,Gulani,Gulani,Gala Bahamma,C1-110851,27
-Yobe,Gulani,Gulani,Gala Chiroma,C1-110852,35
-Yobe,Jakusko,Dumbari,Dumbari Tsangaya,C1-110911,39
-Yobe,Jakusko,Dumbari,Ardo Manu,C1-110912,25
-Yobe,Jakusko,Girgir/Bayam,Bayam Ang Lawan,C1-110921,21
-Yobe,Jakusko,Girgir/Bayam,Garin Buri,C1-110922,51
-Yobe,Jakusko,Zabudum/Dachia,Amshi An Galadima,C1-110931,7
-Yobe,Jakusko,Zabudum/Dachia,Amshi An Hausawa,C1-110932,20
-Yobe,Jakusko,Jawur Katama,Alhaji Jauro,C1-110941,20
-Yobe,Jakusko,Jawur Katama,Jama Are,C1-110942,15
-Yobe,Jakusko,Lafia Loi Loi,Babawuro,C1-110951,27
-Yobe,Jakusko,Lafia Loi Loi,Gada,C1-110952,30
-Yobe,Karasuwa,Fajiganari,Alhaji Maina,C1-111011,11
-Yobe,Karasuwa,Fajiganari,Garin Mallam,C1-111012,14
-Yobe,Karasuwa,Garin Gawo,Buddum,C1-111021,15
-Yobe,Karasuwa,Garin Gawo,Garin Gawo,C1-111022,32
-Yobe,Karasuwa,Gasma,Gadan Dinya,C1-111031,36
-Yobe,Karasuwa,Gasma,Garin Ahmadu Lawanti,C1-111032,25
-Yobe,Karasuwa,Karasuwa Galu,Garin Goni,C1-111041,45
-Yobe,Karasuwa,Karasuwa Galu,Karasuwa Galu B,C1-111042,11
-Yobe,Karasuwa,Karasuwa Garin Guna,Baja,C1-111051,13
-Yobe,Karasuwa,Karasuwa Garin Guna,Hausari,C1-111052,54
-Yobe,Machina,Dole Machina,Hardo M Azu,C1-111111,13
-Yobe,Machina,Dole Machina,Inkibulwa Tari,C1-111112,16
-Yobe,Machina,Falimaram,Abbari Adambe,C1-111121,20
-Yobe,Machina,Falimaram,Ariyamari,C1-111122,18
-Yobe,Machina,Konkomma,Alhaji Hari,C1-111131,24
-Yobe,Machina,Konkomma,Ariyamari,C1-111132,36
-Yobe,Machina,Kukayasku,Garin Isa Tsangayan Bukari,C1-111141,24
-Yobe,Machina,Kukayasku,Kambar Anguwan Maigari Usaini,C1-111142,12
-Yobe,Machina,Machina,Mafidu M Mamman,C1-111151,28
-Yobe,Machina,Machina,Maina Islamia,C1-111152,63
-Yobe,Nangere,Dawasa/Garin Baba,Bagaldi,C1-111211,11
-Yobe,Nangere,Dawasa/Garin Baba,Katsalle,C1-111212,24
-Yobe,Nangere,Degubi,Degubi Sarki,C1-111221,9
-Yobe,Nangere,Degubi,Gabur Sarki,C1-111222,8
-Yobe,Nangere,Duddaye/Pakarau,Duddaye,C1-111231,37
-Yobe,Nangere,Duddaye/Pakarau,Garin Shuwa,C1-111232,39
-Yobe,Nangere,Kukuri/Chiromari,Hassan Girema,C1-111241,28
-Yobe,Nangere,Kukuri/Chiromari,Minchika,C1-111242,15
-Yobe,Nangere,Nangere,Makwayo,C1-111251,36
-Yobe,Nangere,Nangere,Mallam Sarkin Fawa,C1-111252,48
-Yobe,Nguru,Afunori,Afunori,C1-111311,93
-Yobe,Nguru,Afunori,Kaigamari,C1-111312,26
-Yobe,Nguru,Bulabulin,Goruba Haruna Pharmacy,C1-111321,18
-Yobe,Nguru,Bulabulin,Layin Mai Malamala,C1-111322,16
-Yobe,Nguru,Bulanguwa,Balanguwa Lawanti,C1-111331,8
-Yobe,Nguru,Bulanguwa,Gwalgwale Aug Arewa,C1-111332,20
-Yobe,Nguru,Dabule,Jajiruwa,C1-111341,17
-Yobe,Nguru,Dabule,Kallari,C1-111342,30
-Yobe,Nguru,Dumsai,Garin Mallam,C1-111351,11
-Yobe,Nguru,Dumsai,Dumsai,C1-111352,16
-Yobe,Potiskum,Bare Bari,Atiyaye,C1-111411,22
-Yobe,Potiskum,Bare Bari,Jigawa City Petroleum,C1-111412,25
-Yobe,Potiskum,Bolewa A,Baban Sani,C1-111421,17
-Yobe,Potiskum,Bolewa A,Bm Maina Yusuf,C1-111422,15
-Yobe,Potiskum,Bolewa B,Audu 77,C1-111431,16
-Yobe,Potiskum,Bolewa B,M Dalibi,C1-111432,11
-Yobe,Potiskum,Dogo Nini,Adamu Doctor,C1-111441,22
-Yobe,Potiskum,Dogo Nini,Adamu Wanzam,C1-111442,36
-Yobe,Potiskum,Dogo Tebo,Aliyu Daya,C1-111451,8
-Yobe,Potiskum,Dogo Tebo,Bayan Cabs,C1-111452,83
-Yobe,Tarmuwa,Babangida,B Hammadu Pawari,C1-111511,30
-Yobe,Tarmuwa,Babangida,Bulama Bulau Arewa,C1-111512,28
-Yobe,Tarmuwa,Biriri,Galadimawa,C1-111521,22
-Yobe,Tarmuwa,Biriri,Tashan Biri,C1-111522,29
-Yobe,Tarmuwa,Mandadawa,Kojolowa,C1-111531,18
-Yobe,Tarmuwa,Mandadawa,Koromari,C1-111532,40
-Yobe,Tarmuwa,Koriyel,Barbuma,C1-111541,7
-Yobe,Tarmuwa,Koriyel,Fulatari,C1-111542,25
-Yobe,Tarmuwa,Lantewa,Bulama Fugu,C1-111551,18
-Yobe,Tarmuwa,Lantewa,Bulama Audu,C1-111552,40
-Yobe,Yunusari,Yunusari,Ali Butari,C1-111611,16
-Yobe,Yunusari,Yunusari,Izala Mosque,C1-111612,23
-Yobe,Yunusari,Zajibiriri/Dumbol,Dumbol Lawanti,C1-111621,35
-Yobe,Yunusari,Zajibiriri/Dumbol,Fulatari Musaye,C1-111622,13
-Yobe,Yunusari,Dilala/Kalgi,Mustafari,C1-111631,18
-Yobe,Yunusari,Dilala/Kalgi,Yawule,C1-111632,28
-Yobe,Yunusari,Kafiya,Bukar Matoye,C1-111641,40
-Yobe,Yunusari,Kafiya,Kattisulum,C1-111642,35
-Yobe,Yunusari,Toshia,Fulatari Near Toshia,C1-111651,26
-Yobe,Yunusari,Toshia,Goni Mele Street,C1-111652,21
-Yobe,Yusufari,Bulatura,Jekifada,C1-111711,13
-Yobe,Yusufari,Bulatura,Sunomari Bulin,C1-111712,50
-Yobe,Yusufari,Yusufari,Limanti,C1-111721,23
-Yobe,Yusufari,Yusufari,Zangoma Manga,C1-111722,17
-Yobe,Yusufari,Guya,Kasharam Fusemi,C1-111731,20
-Yobe,Yusufari,Guya,Maibugori,C1-111732,36
-Yobe,Yusufari,Jebuwa,Lamido Ali,C1-111741,31
-Yobe,Yusufari,Jebuwa,Shutti,C1-111742,71
-Yobe,Yusufari,Mayori,Kerewa A Maigari Maina,C1-111751,17
-Yobe,Yusufari,Mayori,Kerewa Buk ar,C1-111752,32"""
+Sokoto,Binji,Binji,Gidan Ayya,C3-70111,7
+Sokoto,Binji,Binji,Gidan Garba Daji,C3-70112,6
+Sokoto,Binji,Bunkari,Danmali Yamma,C3-70121,10
+Sokoto,Binji,Bunkari,Gidan Buji,C3-70122,8
+Sokoto,Binji,Gawazai,Bani Zumbu,C3-70131,68
+Sokoto,Binji,Gawazai,Gidan Baba Tulu,C3-70132,6
+Sokoto,Binji,Inname,Faruwa,C3-70141,14
+Sokoto,Binji,Inname,Ginjo,C3-70142,6
+Sokoto,Binji,Jamali,Daddale,C3-70151,14
+Sokoto,Binji,Jamali,Jamali Tsohuwa,C3-70152,22
+Sokoto,Bodinga,Bagarawa,Akayi Ii,C3-70211,16
+Sokoto,Bodinga,Bagarawa,Amanawa,C3-70212,13
+Sokoto,Bodinga,Bangidabaga,Batsauje Shiyar Barade,C3-70221,15
+Sokoto,Bodinga,Bangidabaga,Illela Shiyar Marafa,C3-70222,22
+Sokoto,Bodinga,Bodingatauma,Shiyar Danjekaandi,C3-70231,20
+Sokoto,Bodinga,Bodingatauma,Shiyar Sarki Marafa,C3-70232,12
+Sokoto,Bodinga,Danchadi,Gidandan Bubes Magaji,C3-70241,16
+Sokoto,Bodinga,Danchadi,Kanwuri B,C3-70242,16
+Sokoto,Bodinga,Darhelabadau,Dabagi,C3-70251,15
+Sokoto,Bodinga,Darhelabadau,Tuntsure,C3-70252,15
+Sokoto,Dangeshuni,Bodai,Babban Gida,C3-70311,26
+Sokoto,Dangeshuni,Bodai,Kaura Magaji Gabas,C3-70312,18
+Sokoto,Dangeshuni,Dange,Nasarawa Gabas,C3-70321,18
+Sokoto,Dangeshuni,Dange,Rini,C3-70322,10
+Sokoto,Dangeshuni,Fajaldu,Adarawa Yamma,C3-70331,12
+Sokoto,Dangeshuni,Fajaldu,Bislem Yamma,C3-70332,14
+Sokoto,Dangeshuni,Geeregajara,Bagai Sama,C3-70341,11
+Sokoto,Dangeshuni,Geeregajara,Danwardi,C3-70342,15
+Sokoto,Dangeshuni,Rikina,Bubari Babba,C3-70351,12
+Sokoto,Dangeshuni,Rikina,Bubari Karama,C3-70352,26
+Sokoto,Gada,Dukamaje,Gidan Karo Shiyar Masallaci,C3-70411,14
+Sokoto,Gada,Dukamaje,Tsuga Hayi,C3-70412,13
+Sokoto,Gada,Gilbadi,Batan Warka,C3-70421,13
+Sokoto,Gada,Gilbadi,Batan Warka Shiyar Gabas,C3-70422,16
+Sokoto,Gada,Kadadi,Busaragi,C3-70431,13
+Sokoto,Gada,Kadadi,Kadadi Shiyar Hakimi,C3-70432,14
+Sokoto,Gada,Kaddi,Arawa Shiyar Dan Sarki,C3-70441,23
+Sokoto,Gada,Kaddi,Arawa Shiyar Masallaci,C3-70442,30
+Sokoto,Gada,Kaffe,Alibawa Shiyar Gidan Fako,C3-70451,12
+Sokoto,Gada,Kaffe,Dantudu Shiyar Madawaki,C3-70452,13
+Sokoto,Goronyo,Birjingo,Akuzo,C3-70511,16
+Sokoto,Goronyo,Birjingo,Danya,C3-70512,5
+Sokoto,Goronyo,Boyekai,Gidan Bawa Malaba,C3-70521,25
+Sokoto,Goronyo,Boyekai,Gidan Marafa Shiyar Yamma,C3-70522,5
+Sokoto,Goronyo,Giyawa,Akuzo,C3-70531,9
+Sokoto,Goronyo,Giyawa,Galbace C,C3-70532,15
+Sokoto,Goronyo,Goronyo,Dan Rairai,C3-70541,11
+Sokoto,Goronyo,Goronyo,Gadon Mata Shiyar Gabas B,C3-70542,26
+Sokoto,Goronyo,Kagara,Balla Sabon Gari A,C3-70551,24
+Sokoto,Goronyo,Kagara,Dan Jiro,C3-70552,25
+Sokoto,Gudu,Awilkiti,Awulkitikware,C3-70611,11
+Sokoto,Gudu,Awilkiti,Barebari,C3-70612,11
+Sokoto,Gudu,Bachaka,Unguwar Huri,C3-70621,7
+Sokoto,Gudu,Bachaka,Kukar Geza,C3-70622,5
+Sokoto,Gudu,Balle,Balle Shiyar Dosawa,C3-70631,6
+Sokoto,Gudu,Balle,Gidan Rabo,C3-70632,6
+Sokoto,Gudu,Chilas,Chilas Gabas,C3-70641,89
+Sokoto,Gudu,Chilas,Dangadabro Gabas,C3-70642,11
+Sokoto,Gudu,Gwazange,Boto Shiyar Gube,C3-70651,6
+Sokoto,Gudu,Gwazange,Boto Shiyar Kasuwa,C3-70652,10
+Sokoto,Gwadabawa,Asara,Birnidil,C3-70711,11
+Sokoto,Gwadabawa,Asara,Zangon Namali,C3-70712,12
+Sokoto,Gwadabawa,Atakwanyo,Gidan Magaji Waziri,C3-70721,18
+Sokoto,Gwadabawa,Atakwanyo,Gidan Maisa,C3-70722,20
+Sokoto,Gwadabawa,Chimola,Dan Barunje,C3-70731,35
+Sokoto,Gwadabawa,Chimola,Kanwuri Gabas,C3-70732,12
+Sokoto,Gwadabawa,Gidankaya,Gidan Dutse,C3-70741,13
+Sokoto,Gwadabawa,Gidankaya,Gwara Shiyar Liman,C3-70742,11
+Sokoto,Gwadabawa,Gigane,Gamaru,C3-70751,14
+Sokoto,Gwadabawa,Gigane,Shiyar Galadima,C3-70752,14
+Sokoto,Illela,Araba,B Dusti,C3-70811,5
+Sokoto,Illela,Araba,Danboka,C3-70812,10
+Sokoto,Illela,Damba,Cudan,C3-70821,50
+Sokoto,Illela,Damba,Cudanala,C3-70822,16
+Sokoto,Illela,Darnasabongari,Dullu,C3-70831,12
+Sokoto,Illela,Darnasabongari,Gidan Tudu,C3-70832,13
+Sokoto,Illela,Darnatsolawo,Birnin Isah,C3-70841,6
+Sokoto,Illela,Darnatsolawo,Birnin Isah Dusti,C3-70842,7
+Sokoto,Illela,Garu,Buwadawa Tsururu,C3-70851,22
+Sokoto,Illela,Garu,Diboni Nasarawa,C3-70852,21
+Sokoto,Isa,Bargaja,Gidan Dawa,C3-70911,23
+Sokoto,Isa,Bargaja,Dan Zanke Fage,C3-70912,21
+Sokoto,Isa,Gebe A,Kagara Ganuwa,C3-70921,15
+Sokoto,Isa,Gebe A,Manawa Kanwuri,C3-70922,16
+Sokoto,Isa,Gebe B,Dan Gurmu,C3-70931,18
+Sokoto,Isa,Gebe B,Dan Koloto Gabas,C3-70932,17
+Sokoto,Isa,Isa North,Angawa1,C3-70941,17
+Sokoto,Isa,Isa North,Kantamawa Shiyar Mainasara Magaji,C3-70942,12
+Sokoto,Isa,Isa South,Gidan Rukuma Kabo,C3-70951,9
+Sokoto,Isa,Isa South,Korawa,C3-70952,14
+Sokoto,Kebbe,Fakku,Bashi Shiyar Hakimi,C3-71011,7
+Sokoto,Kebbe,Fakku,Bashi Shiyar Yamma,C3-71012,7
+Sokoto,Kebbe,Girkau,Dankujeri,C3-71021,13
+Sokoto,Kebbe,Girkau,Gidan Dangwani,C3-71022,12
+Sokoto,Kebbe,Kebbeeast,Kebbe Town,C3-71031,11
+Sokoto,Kebbe,Kebbeeast,Shiyar Sabongari,C3-71032,32
+Sokoto,Kebbe,Kebbewest,Shiyar Bazaik,C3-71041,9
+Sokoto,Kebbe,Kebbewest,Shiyar Ajiya,C3-71042,13
+Sokoto,Kebbe,Kuchi,Arausaya,C3-71051,46
+Sokoto,Kebbe,Kuchi,Matatar Iska,C3-71052,12
+Sokoto,Kware,Bankanu,Agalawa,C3-71111,9
+Sokoto,Kware,Bankanu,Gidan Alfari,C3-71112,6
+Sokoto,Kware,Basansan,Adarawa,C3-71121,12
+Sokoto,Kware,Basansan,Gidan Fadama,C3-71122,15
+Sokoto,Kware,Durbawa,Asaula,C3-71131,40
+Sokoto,Kware,Durbawa,Durbawa Bakin Titi,C3-71132,20
+Sokoto,Kware,Gandu,Gidan Alkali,C3-71141,9
+Sokoto,Kware,Gandu,Gidan Dala,C3-71142,10
+Sokoto,Kware,Gidan Ruggamore,Badageni,C3-71151,22
+Sokoto,Kware,Gidanruggamore,G Kwano,C3-71152,18
+Sokoto,Rabah,Gandi1,Adarkawa,C3-71211,17
+Sokoto,Rabah,Gandi1,Dankadu,C3-71212,12
+Sokoto,Rabah,Gandi2,Alikiru,C3-71221,15
+Sokoto,Rabah,Gandi2,Cikaltun Fulani,C3-71222,13
+Sokoto,Rabah,Gandiii,Dangazuri,C3-71231,15
+Sokoto,Rabah,Gandiii,Dangazuri Jumuah Mosque,C3-71232,14
+Sokoto,Rabah,Goddodi,Shiyar Bagudu,C3-71241,16
+Sokoto,Rabah,Goddodi,Shiyar Dangaladima,C3-71242,14
+Sokoto,Rabah,Kurya,Chakaltu,C3-71251,28
+Sokoto,Rabah,Kurya,Mashekari,C3-71252,16
+Sokoto,Sabonbirni,Gatawa,Burkusuma/Kuti,C3-71311,12
+Sokoto,Sabonbirni,Gatawa,Dankaka,C3-71312,14
+Sokoto,Sabonbirni,Kalgo,Dankarmaum,C3-71321,30
+Sokoto,Sabonbirni,Kalgo,Garin Dadi,C3-71322,11
+Sokoto,Sabonbirni,Kurawa,Dabugi/Adarawa,C3-71331,16
+Sokoto,Sabonbirni,Kurawa,Dakwaro Gidanjibo,C3-71332,17
+Sokoto,Sabonbirni,Lajinge,Dungurum Adarawa,C3-71341,16
+Sokoto,Sabonbirni,Lajinge,Jira Shiyar Ila,C3-71342,14
+Sokoto,Sabonbirni,Makuwana,Balbebu Zsala,C3-71351,15
+Sokoto,Sabonbirni,Makuwana,Faru Shiyar Adamu,C3-71352,16
+Sokoto,Shagari,Dandinmahe,Dandin Mahe Shiyar Gandu,C3-71411,12
+Sokoto,Shagari,Dandinmahe,Dandin Mahe Shiyar Kanwuri,C3-71412,15
+Sokoto,Shagari,Gangan,Gangan Shiyar Sarkin Fada,C3-71421,32
+Sokoto,Shagari,Gangan,Gidan Daji,C3-71422,13
+Sokoto,Shagari,Horo,Horo Shiyar Dikko,C3-71431,28
+Sokoto,Shagari,Horo,Horo Shiyar Kwadarko,C3-71432,10
+Sokoto,Shagari,Jaredi,Jaredi Shiyar Asibiti,C3-71441,13
+Sokoto,Shagari,Jaredi,Labani,C3-71442,12
+Sokoto,Shagari,Kajiji,Lafiyar Bature,C3-71451,8
+Sokoto,Shagari,Kajiji,Asarara B,C3-71452,18
+Sokoto,Silame,Gandeward,Falanje,C3-71511,29
+Sokoto,Silame,Gandeward,Gaukonawa,C3-71512,14
+Sokoto,Silame,Gaukaiward,Chofal,C3-71521,11
+Sokoto,Silame,Gaukaiward,Gidan Yaya A,C3-71522,13
+Sokoto,Silame,Jekanaduward,Burmawa,C3-71531,10
+Sokoto,Silame,Jekanaduward,Gabbuwa Gari A,C3-71532,9
+Sokoto,Silame,Kataminorth,Gidan Dari,C3-71541,14
+Sokoto,Silame,Kataminorth,Ingwaba,C3-71542,21
+Sokoto,Silame,Katamisouth,Baichin Koli,C3-71551,29
+Sokoto,Silame,Katamisouth,Gadambe Pegi,C3-71552,11
+Sokoto,Sokoto North,Magajingaria,Binanchi Late Maccido,C3-71611,9
+Sokoto,Sokoto North,Magajingaria,Helele Alh Bello Fari,C3-71612,23
+Sokoto,Sokoto North,Magajingarib,Gidan Sauro Sarkin Baki,C3-71621,13
+Sokoto,Sokoto North,Magajingarib,Sagin Lemu,C3-71622,30
+Sokoto,Sokoto North,Magajinrafia,Alkammawa Saurawa,C3-71631,16
+Sokoto,Sokoto North,Magajinrafia,Alkammawa Shiyar Bunu,C3-71632,13
+Sokoto,Sokoto North,Magajinrafib,Danfili Ashafa,C3-71641,16
+Sokoto,Sokoto North,Magajinrafib,Police Barack Yamma,C3-71642,21
+Sokoto,Sokoto North,Sarkinadargandu,Hajiya Halima C,C3-71651,8
+Sokoto,Sokoto North,Sarkinadargandu,Kaura/Kawa A&Stc,C3-71652,12
+Sokoto,Sokoto South,Gagia,Gagi Rugga Bayan Makaranta,C3-71711,22
+Sokoto,Sokoto South,Gagia,Gidan Masau Shiyar Makaranta,C3-71712,8
+Sokoto,Sokoto South,Gagib,Sagagin Abs Mai Purewater,C3-71721,9
+Sokoto,Sokoto South,Gagib,Sagagin Malan Kwaire,C3-71722,17
+Sokoto,Sokoto South,Gagic,Gidan Dahala Shiyar Asani Baya,C3-71731,47
+Sokoto,Sokoto South,Gagic,Iddi Yar Ksuwa Baya,C3-71732,13
+Sokoto,Sokoto South,Rijiaa,Back Of Specialist,C3-71741,11
+Sokoto,Sokoto South,Rijiaa,Hilin Boka Shiyar Mansur,C3-71742,10
+Sokoto,Sokoto South,Rijiab,Diploma Firstbank,C3-71751,14
+Sokoto,Sokoto South,Rijiab,Garkar Sarkin Gara,C3-71752,10
+Sokoto,Tambuwal,Bagida,Dogon Gona,C3-71811,3
+Sokoto,Tambuwal,Bagida,Ganuwa Sabon Gari,C3-71812,3
+Sokoto,Tambuwal,Barkejinabaguda,Gidan Mai Zuma,C3-71821,3
+Sokoto,Tambuwal,Barkejinabaguda,Kyanko A,C3-71822,9
+Sokoto,Tambuwal,Bashiremaikada,Labe Gabas,C3-71831,12
+Sokoto,Tambuwal,Bashiremaikada,Maikada Gabas,C3-71832,13
+Sokoto,Tambuwal,Dogondaji,Barguwa,C3-71841,8
+Sokoto,Tambuwal,Dogondaji,Mashekarin Mata,C3-71842,103
+Sokoto,Tambuwal,Fagaalasan,Inwala,C3-71851,4
+Sokoto,Tambuwal,Fagaalasan,Kaurar Inwala,C3-71852,4
+Sokoto,Tangaza,Gidanmadi,Dakala,C3-71911,15
+Sokoto,Tangaza,Gidanmadi,Gidan Daji,C3-71912,9
+Sokoto,Tangaza,Kalanjeni,Adarawa Tudu,C3-71921,14
+Sokoto,Tangaza,Kalanjeni,Gida Marafi,C3-71922,18
+Sokoto,Tangaza,Kwaccehuru,Araba,C3-71931,19
+Sokoto,Tangaza,Kwaccehuru,Araba Daji,C3-71932,8
+Sokoto,Tangaza,Magonho,Ailya Hausawa,C3-71941,17
+Sokoto,Tangaza,Magonho,Gidan Garba,C3-71942,16
+Sokoto,Tangaza,Raka,Gidan Abdul,C3-71951,29
+Sokoto,Tangaza,Raka,Hawa Ukku,C3-71952,14
+Sokoto,Tureta,Dangulbi,Barkatube Garin Magaji Usman,C3-72011,12
+Sokoto,Tureta,Dangulbi,Dangulbi Shiyar Alh Zarumi,C3-72012,8
+Sokoto,Tureta,Duma,Makera,C3-72021,7
+Sokoto,Tureta,Duma,Takalmawa,C3-72022,14
+Sokoto,Tureta,Furagirke,Fura Girke Shiyar Masallachi,C3-72031,12
+Sokoto,Tureta,Furagirke,Fura Girke Shiyar Runji,C3-72032,8
+Sokoto,Tureta,Gidankare,Bimasa Tasha Shiyar Liman,C3-72041,29
+Sokoto,Tureta,Gidankare,Daddabi,C3-72042,8
+Sokoto,Tureta,Kuruwa,Galadimmai Shiyar Dantudu,C3-72051,18
+Sokoto,Tureta,Kuruwa,Gidan Arzika,C3-72052,44
+Sokoto,Wamakko,Arkilla,Bafarawa Qtrs(Wamakko),C3-72111,16
+Sokoto,Wamakko,Arkilla,Gidan Amba,C3-72112,6
+Sokoto,Wamakko,Bado,Alu Quarters,C3-72121,37
+Sokoto,Wamakko,Bado,Badon Rafi Abc,C3-72122,20
+Sokoto,Wamakko,Dundaye,Dundaye Gabas,C3-72131,29
+Sokoto,Wamakko,Dundaye,Kaura Bella,C3-72132,29
+Sokoto,Wamakko,Gidanbubu,Adarawa,C3-72141,5
+Sokoto,Wamakko,Gidanbubu,Firgeja Marmaro,C3-72142,7
+Sokoto,Wamakko,Gidanhamidu,Anguwar Ruwa,C3-72151,6
+Sokoto,Wamakko,Gidanhamidu,Garu,C3-72152,5
+Sokoto,Wurno,Achida,Sabongari B,C3-72211,23
+Sokoto,Wurno,Achida,Shiyar Ajiya,C3-72212,18
+Sokoto,Wurno,Alkammu,Dan Durumi,C3-72221,11
+Sokoto,Wurno,Alkammu,G Fadama,C3-72222,10
+Sokoto,Wurno,Chachomarnona,Doron Sule,C3-72231,29
+Sokoto,Wurno,Chachomarnona,Gidan Tudu,C3-72232,7
+Sokoto,Wurno,Dimbiso,Dutsi,C3-72241,12
+Sokoto,Wurno,Dimbiso,Shiyar Naibi A,C3-72242,10
+Sokoto,Wurno,Dinawa,Gwargawa,C3-72251,12
+Sokoto,Wurno,Dinawa,Sarkin Yaki A,C3-72252,29
+Sokoto,Yabo,Bakale,Bakale Shiyar Makaranta,C3-72311,16
+Sokoto,Yabo,Bakale,Bakale Shiyar Masanlachi,C3-72312,10
+Sokoto,Yabo,Bengaje,Adiga Marina,C3-72321,17
+Sokoto,Yabo,Bengaje,Bengaje Shiyar Magaji Ii,C3-72322,13
+Sokoto,Yabo,Binjinmuza,Kautaki,C3-72331,11
+Sokoto,Yabo,Binjinmuza,Kibiyare Shiyar Magaji,C3-72332,16
+Sokoto,Yabo,Birniruwa,Birninruwa D Dutsi,C3-72341,24
+Sokoto,Yabo,Birniruwa,Birninruwa G Galoji,C3-72342,28
+Sokoto,Yabo,Dagawa,Danbalo Sabon Gari,C3-72351,14
+Sokoto,Yabo,Dagawa,Magacci Sarki Shiyar/Malammai,C3-72352,12
+"""
 
 # Load community mapping
 try:
@@ -529,23 +707,29 @@ except Exception as e:
 # Format: {lga_username: lga_name}
 # Usernames are case-insensitive (will be converted to lowercase)
 LGA_CREDENTIALS = {
-    "bade": "Bade",
-    "bursari": "Bursari",
-    "damaturu": "Damaturu",
-    "fika": "Fika",
-    "fune": "Fune",
-    "geidam": "Geidam",
-    "gujba": "Gujba",
-    "gulani": "Gulani",
-    "jakusko": "Jakusko",
-    "karasuwa": "Karasuwa",
-    "machina": "Machina",
-    "nangere": "Nangere",
-    "nguru": "Nguru",
-    "potiskum": "Potiskum",
-    "tarmuwa": "Tarmuwa",
-    "yunusari": "Yunusari",
-    "yusufari": "Yusufari",
+    "binji": "Binji",
+    "bodinga": "Bodinga",
+    "dangeshuni": "Dange Shuni",
+    "gada": "Gada",
+    "goronyo": "Goronyo",
+    "gudu": "Gudu",
+    "gwadabawa": "Gwadabawa",
+    "illela": "Illela",
+    "isa": "Isa",
+    "kebbe": "Kebbe",
+    "kware": "Kware",
+    "rabah": "Rabah",
+    "sabonbirni": "Sabon Birni",
+    "shagari": "Shagari",
+    "silame": "Silame",
+    "sokoto north": "Sokoto North",
+    "sokoto south": "Sokoto South",
+    "tambuwal": "Tambuwal",
+    "tangaza": "Tangaza",
+    "tureta": "Tureta",
+    "wamakko": "Wamakko",
+    "wurno": "Wurno",
+    "yabo": "Yabo",
 }
 
 # ---------------- DATA LOADING FUNCTION ----------------
@@ -597,7 +781,7 @@ def load_data(force_refresh=False):
         st.error(f"❌ Error loading data: {str(e)}")
         st.info("💡 **Possible Issues:**\n"
                 "1. Invalid Excel file format\n"
-                "2. Sheet names don't match (expected: 'SARMAAN II AMR YOBE STATE', 'mother_information', 'child_info')\n"
+                "2. Sheet names don't match (expected: 'SARMAAN II C3 SOKOTO AMR TRA...', 'mother_information', 'child_info')\n"
                 "3. Check that the export URL is correct")
         return pd.DataFrame(), pd.DataFrame(), pd.DataFrame()
         
@@ -788,15 +972,47 @@ def perform_comprehensive_qc_checks(df_main, df_mother, df_child):
         df_with_child = df_main.copy()
     
     # QC CHECK 1: Education-Occupation Mismatch
-    # If Q13 (highest education level) = "Non Formal Education" AND Q15 (occupation) = "Professional/Managerial"
-    education_col = 'Q13. What is the highest level of school you attended: primary, secondary, or higher?\nMenene zurfin ilimin ki?\t\nMakarantar firamare, ko sakandare, ko fiye da haka?'
-    occupation_col = "Q15. Household head's occupation"
+    # If Q13 (highest education level) = "No Formal Education" AND Q15 (occupation) = "Professional/technical/managerial"
+    # Find columns using pattern matching to avoid exact name issues
+    education_col = None
+    occupation_col = None
     
-    if education_col in df_main.columns and occupation_col in df_main.columns:
+    for col in df_main.columns:
+        if 'Q13' in col and 'highest level of school' in col.lower():
+            education_col = col
+        if 'Q15' in col and 'occupation' in col.lower():
+            occupation_col = col
+    
+    # DEBUG: Print to console what we're checking
+    print(f"\n=== QC CHECK 1 DEBUG ===")
+    print(f"Education column found: {education_col is not None}")
+    print(f"Occupation column found: {occupation_col is not None}")
+    
+    if education_col and occupation_col:
+        # DEBUG: Show unique values
+        print(f"\nUnique Education values: {df_main[education_col].unique()}")
+        print(f"Unique Occupation values: {df_main[occupation_col].unique()}")
+        
+        # DEBUG: Check for records with "No Formal Education"
+        no_formal_count = (df_main[education_col] == 'No Formal Education').sum()
+        print(f"\nRecords with 'No Formal Education': {no_formal_count}")
+        
+        # DEBUG: Check for records with "Professional/technical/managerial"
+        professional_count = (df_main[occupation_col] == 'Professional/technical/managerial').sum()
+        print(f"Records with 'Professional/technical/managerial': {professional_count}")
+        
+        # Check for the mismatch - using correct values from the form
         edu_occ_mismatch = df_main[
-            (df_main[education_col] == 'Non Formal Education') &
-            (df_main[occupation_col] == 'Professional/Managerial')
+            (df_main[education_col] == 'No Formal Education') &
+            (df_main[occupation_col] == 'Professional/technical/managerial')
         ]
+        
+        print(f"\nRecords matching BOTH conditions: {len(edu_occ_mismatch)}")
+        if len(edu_occ_mismatch) > 0:
+            print("Sample record:")
+            print(f"  Education: '{edu_occ_mismatch.iloc[0][education_col]}'")
+            print(f"  Occupation: '{edu_occ_mismatch.iloc[0][occupation_col]}'")
+        print("=" * 50)
         
         for idx, row in edu_occ_mismatch.iterrows():
             qc_issues.append({
@@ -807,8 +1023,11 @@ def perform_comprehensive_qc_checks(df_main, df_mother, df_child):
                 'Enumerator': row.get('username', ''),
                 'Validation Status': row.get('_validation_status', ''),
                 'Issue Type': 'Education-Occupation Mismatch',
-                'Description': 'No formal education but has Professional/Managerial occupation'
+                'Description': f'No formal education but has Professional/technical/managerial occupation (Education: {row[education_col]}, Occupation: {row[occupation_col]})'
             })
+    else:
+        print("One or both columns not found!")
+        print("=" * 50)
     
     # QC CHECK 2: Urban Settlement with No Basic Amenities
     # All amenity questions must = "No" and settlement type = "Urban"
@@ -998,19 +1217,19 @@ def login_page():
             if login_button:
                 if not username:
                     st.error("❌ Please enter a username")
-                # Check admin login
-                elif username.lower() == "admin":
+                # Check admin login (case-insensitive)
+                elif username.strip().lower() == "admin":
                     st.session_state.logged_in = True
-                    st.session_state.current_user = username
+                    st.session_state.current_user = "admin"
                     st.session_state.user_role = 'admin'
                     st.success("✅ Admin login successful!")
                     st.rerun()
                 
-                # Check LGA login
-                elif username.lower() in LGA_CREDENTIALS:
-                    lga_name = LGA_CREDENTIALS[username.lower()]
+                # Check LGA login (case-insensitive)
+                elif username.strip().lower() in LGA_CREDENTIALS:
+                    lga_name = LGA_CREDENTIALS[username.strip().lower()]
                     st.session_state.logged_in = True
-                    st.session_state.current_user = username
+                    st.session_state.current_user = username.strip().lower()
                     st.session_state.user_role = 'lga'
                     st.session_state.selected_lga = lga_name
                     st.success(f"✅ Login successful! Welcome {lga_name} LGA supervisor")
@@ -1027,12 +1246,12 @@ def login_page():
                 
                 **For LGA Supervisors:**
                 - Username: Your LGA name (lowercase)
-                - Examples: `potiskum`, `bade`, `damaturu`, `fika`, etc.
+                - Examples: `Binji`, `Gada`, `Gudu`, `Yabo`, etc.
                 
                 **Available LGAs:**
-                Bade, Bursari, Damaturu, Fika, Fune, Geidam, Gujba, Gulani, 
-                Jakusko, Karasuwa, Machina, Nangere, Nguru, Potiskum, 
-                Tarmuwa, Yunusari, Yusufari
+                Binji, Bodinga, Dange Shuni, Gada, Goronyo, Gudu, Gwadabawa, Illela, 
+                Isa, Kebbe, Kware, Rabah, Sabon Birni, Shagari, Silame, Sokoto North, 
+                Sokoto South, Tambuwal, Tangaza, Tureta, Wamakko, Wurno, Yabo
                 
                 📞 Contact your M&E coordinator for login issues
                 """)
@@ -1084,12 +1303,18 @@ def run_dashboard(df_main, df_mother, df_child):
         unsafe_allow_html=True
     )
     
+    # Store original unfiltered data for QC checks
+    df_main_original = df_main.copy()
+    df_mother_original = df_mother.copy()
+    df_child_original = df_child.copy()
+    
     # Filter data based on user role
     if st.session_state.user_role == 'lga':
         lga_col = find_column_with_keyword(df_main, 'Local Government')
         
         if lga_col and lga_col in df_main.columns:
-            df_main = df_main[df_main[lga_col] == st.session_state.selected_lga]
+            # Case-insensitive matching for LGA
+            df_main = df_main[df_main[lga_col].str.upper() == st.session_state.selected_lga.upper()]
             
             # Filter related tables
             household_uuids = df_main['_uuid'].unique()
@@ -1143,7 +1368,8 @@ def run_dashboard(df_main, df_mother, df_child):
                 selected_lga = st.selectbox("Select LGA", lgas)
                 
                 if selected_lga != "All":
-                    df_main = df_main[df_main[lga_col] == selected_lga]
+                    # Case-insensitive matching for LGA
+                    df_main = df_main[df_main[lga_col].str.upper() == selected_lga.upper()]
             
             ward_col = find_column_with_keyword(df_main, 'Ward')
             if ward_col and ward_col in df_main.columns:
@@ -1312,6 +1538,52 @@ def run_dashboard(df_main, df_mother, df_child):
             else '❌ Not Started', axis=1
         )
         
+        # Calculate summary metrics
+        total_planned_hh = coverage_table['Planned_Community'].sum()
+        total_reached_hh = coverage_table['Actual_Submissions'].sum()
+        overall_coverage = (total_reached_hh / total_planned_hh * 100) if total_planned_hh > 0 else 0
+        
+        # Calculate communities at target (100% or more coverage)
+        communities_at_target = (coverage_table['Actual_Submissions'] >= coverage_table['Planned_Community']).sum()
+        total_communities = len(coverage_table)
+        
+        # Display large metrics in a row
+        col1, col2, col3, col4 = st.columns(4)
+        
+        with col1:
+            st.markdown(f"""
+            <div style='text-align: left; padding: 20px; background-color: white; border-radius: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);'>
+                <p style='color: #64748b; font-size: 16px; margin: 0;'>Total Planned HH</p>
+                <h1 style='color: #1e293b; font-size: 48px; margin: 10px 0; font-weight: bold;'>{total_planned_hh:,}</h1>
+            </div>
+            """, unsafe_allow_html=True)
+        
+        with col2:
+            st.markdown(f"""
+            <div style='text-align: left; padding: 20px; background-color: white; border-radius: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);'>
+                <p style='color: #64748b; font-size: 16px; margin: 0;'>Total Reached HH</p>
+                <h1 style='color: #1e293b; font-size: 48px; margin: 10px 0; font-weight: bold;'>{total_reached_hh:,}</h1>
+            </div>
+            """, unsafe_allow_html=True)
+        
+        with col3:
+            st.markdown(f"""
+            <div style='text-align: left; padding: 20px; background-color: white; border-radius: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);'>
+                <p style='color: #64748b; font-size: 16px; margin: 0;'>Overall Coverage</p>
+                <h1 style='color: #1e293b; font-size: 48px; margin: 10px 0; font-weight: bold;'>{overall_coverage:.0f}%</h1>
+            </div>
+            """, unsafe_allow_html=True)
+        
+        with col4:
+            st.markdown(f"""
+            <div style='text-align: left; padding: 20px; background-color: white; border-radius: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);'>
+                <p style='color: #64748b; font-size: 16px; margin: 0;'>Communities @ Target</p>
+                <h1 style='color: #1e293b; font-size: 48px; margin: 10px 0; font-weight: bold;'>{communities_at_target}/{total_communities}</h1>
+            </div>
+            """, unsafe_allow_html=True)
+        
+        st.markdown("<br>", unsafe_allow_html=True)
+        
         # Debug information (show in expander)
         with st.expander("🔍 Debug Info - Click to see data matching details"):
             st.write(f"**Total submissions in dataset:** {len(df_main_copy):,}")
@@ -1331,28 +1603,12 @@ def run_dashboard(df_main, df_mother, df_child):
                 st.write("**Sample community codes from data:**")
                 st.dataframe(df_main_copy['_community_code_original'].value_counts().head(10), use_container_width=True)
         
-        # Display summary stats
-        col1, col2, col3, col4 = st.columns(4)
-        total_communities = len(coverage_table)
-        completed = (coverage_table['Actual_Submissions'] >= coverage_table['Planned_Community']).sum()
-        partial = ((coverage_table['Actual_Submissions'] > 0) & (coverage_table['Actual_Submissions'] < coverage_table['Planned_Community'])).sum()
-        not_started = (coverage_table['Actual_Submissions'] == 0).sum()
-        
-        with col1:
-            st.metric("Total Communities", f"{total_communities:,}")
-        with col2:
-            st.metric("✅ Completed", f"{completed:,}", delta=f"{(completed/total_communities*100):.1f}%")
-        with col3:
-            st.metric("⚠️ Partial", f"{partial:,}", delta=f"{(partial/total_communities*100):.1f}%")
-        with col4:
-            st.metric("❌ Not Started", f"{not_started:,}", delta=f"{(not_started/total_communities*100):.1f}%")
-        
         # Display table
         st.markdown("#### Detailed Community Coverage")
         
-        # Filter by LGA if not admin
+        # Filter by LGA if not admin (case-insensitive)
         if st.session_state.user_role == 'lga':
-            coverage_table = coverage_table[coverage_table['lga'] == st.session_state.selected_lga]
+            coverage_table = coverage_table[coverage_table['lga'].str.upper() == st.session_state.selected_lga.upper()]
         
         # Display columns
         display_coverage = coverage_table[[
@@ -1425,14 +1681,29 @@ def run_dashboard(df_main, df_mother, df_child):
     # Quality Control Checks Section
     st.markdown('<div class="section-header"><h2 class="section-title">🔍 Quality Control Checks</h2></div>', unsafe_allow_html=True)
     
-    # Perform comprehensive QC checks
-    qc_issues_df = perform_comprehensive_qc_checks(df_main, df_mother, df_child)
+    # Perform comprehensive QC checks on ORIGINAL unfiltered data
+    qc_issues_df = perform_comprehensive_qc_checks(df_main_original, df_mother_original, df_child_original)
     
-    # Calculate QC metrics
+    # If user is LGA, filter QC issues to show only their LGA (case-insensitive)
+    if st.session_state.user_role == 'lga':
+        lga_col_name = 'Q3. Local Government Area'
+        if 'LGA' in qc_issues_df.columns:
+            qc_issues_df = qc_issues_df[qc_issues_df['LGA'].str.upper() == st.session_state.selected_lga.upper()]
+        elif lga_col_name in qc_issues_df.columns:
+            qc_issues_df = qc_issues_df[qc_issues_df[lga_col_name].str.upper() == st.session_state.selected_lga.upper()]
+    
+    # Calculate QC metrics safely
     total_issues = len(qc_issues_df)
-    age_inconsistencies = len(qc_issues_df[qc_issues_df['Issue Type'] == 'Age Inconsistency'])
+    
+    # Check if qc_issues_df has data and the required column before accessing it
+    if not qc_issues_df.empty and 'Issue Type' in qc_issues_df.columns:
+        age_inconsistencies = len(qc_issues_df[qc_issues_df['Issue Type'] == 'Age Inconsistency'])
+        other_issues = total_issues - age_inconsistencies
+    else:
+        age_inconsistencies = 0
+        other_issues = 0
+    
     duplicates = qc_metrics['duplicate_households'] + qc_metrics['duplicate_mothers'] + qc_metrics['duplicate_children']
-    other_issues = total_issues - age_inconsistencies
     
     # Display QC summary metrics
     col1, col2, col3, col4 = st.columns(4)

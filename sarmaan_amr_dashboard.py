@@ -1077,53 +1077,6 @@ def perform_comprehensive_qc_checks(df_main, df_mother, df_child):
                     'Description': 'Urban settlement but household has no basic amenities'
                 })
     
-    # QC CHECK 3: Children count mismatch (Q48 vs Q56 in mother sheet)
-    # Q48 in main sheet should equal Q56 in mother sheet
-    main_children_col = 'Q48. How many children in the household are 1-59 months of age?'
-    mother_children_col = 'Q56. Total Number of Children 1 - 59 months'
-    
-    if main_children_col in df_merged.columns and mother_children_col in df_merged.columns:
-        children_mismatch = df_merged[
-            (df_merged[main_children_col].notna()) &
-            (df_merged[mother_children_col].notna()) &
-            (df_merged[main_children_col] != df_merged[mother_children_col])
-        ]
-        
-        for idx, row in children_mismatch.iterrows():
-            qc_issues.append({
-                'LGA': row.get('Q3. Local Government Area', ''),
-                'Ward': row.get('Q4. Ward', ''),
-                'Community': row.get('Q5. Community Name', ''),
-                'Unique HH ID': row.get('unique_code', ''),
-                'Enumerator': row.get('username', ''),
-                'Validation Status': row.get('_validation_status', ''),
-                'Issue Type': 'Children Count Mismatch (1-59 months)',
-                'Description': f'Main sheet: {row[main_children_col]}, Mother sheet: {row[mother_children_col]}'
-            })
-    
-    # QC CHECK 4: Infants count mismatch (Q49 vs Q55 in mother sheet)
-    main_infants_col = 'Q49. How many children in the household are 0 - 28 days of age?'
-    mother_infants_col = 'Q55. Total Number of Children less than 1 month'
-    
-    if main_infants_col in df_merged.columns and mother_infants_col in df_merged.columns:
-        infants_mismatch = df_merged[
-            (df_merged[main_infants_col].notna()) &
-            (df_merged[mother_infants_col].notna()) &
-            (df_merged[main_infants_col] != df_merged[mother_infants_col])
-        ]
-        
-        for idx, row in infants_mismatch.iterrows():
-            qc_issues.append({
-                'LGA': row.get('Q3. Local Government Area', ''),
-                'Ward': row.get('Q4. Ward', ''),
-                'Community': row.get('Q5. Community Name', ''),
-                'Unique HH ID': row.get('unique_code', ''),
-                'Enumerator': row.get('username', ''),
-                'Validation Status': row.get('_validation_status', ''),
-                'Issue Type': 'Infants Count Mismatch (0-28 days)',
-                'Description': f'Main sheet: {row[main_infants_col]}, Mother sheet: {row[mother_infants_col]}'
-            })
-    
     # QC CHECK 5: AZM recipients exceeds total children
     # Q58 (AZM recipients) should not be greater than Q47 (total children 0-59 months)
     main_total_children_col = 'Q47. How many children in the household are 0-59 months of age?'

@@ -1131,6 +1131,79 @@ def perform_comprehensive_qc_checks(df_main, df_mother, df_child):
                     'Description': f'Child age ({row[child_age_col]} months) exceeds 59 months'
                 })
     
+    # QC CHECK 7: Duplicate Household IDs
+    household_id_col = 'unique_code' if 'unique_code' in df_main.columns else find_column_with_keyword(df_main, 'unique_code')
+    if household_id_col and household_id_col in df_main.columns:
+        # Find duplicate household IDs
+        duplicate_hh = df_main[df_main[household_id_col].duplicated(keep=False)]
+        
+        if not duplicate_hh.empty:
+            # Group by household ID to show all duplicates together
+            for hh_id, group in duplicate_hh.groupby(household_id_col):
+                for idx, row in group.iterrows():
+                    qc_issues.append({
+                        'LGA': row.get('Q3. Local Government Area', ''),
+                        'Ward': row.get('Q4. Ward', ''),
+                        'Community': row.get('Q5. Community Name', ''),
+                        'Unique HH ID': row.get('unique_code', ''),
+                        'Enumerator': row.get('username', ''),
+                        'Validation Status': row.get('_validation_status', ''),
+                        'Issue Type': 'Duplicate Household ID',
+                        'Description': f'Household ID "{hh_id}" appears {len(group)} times in the dataset'
+                    })
+    
+    # QC CHECK 8: Duplicate Mother IDs
+    if not df_mother.empty and 'mother_id' in df_mother.columns:
+        duplicate_mothers = df_mother[df_mother['mother_id'].duplicated(keep=False)]
+        
+        if not duplicate_mothers.empty:
+            # Merge with main to get household info
+            duplicate_mothers_merged = duplicate_mothers.merge(
+                df_main[['_uuid', 'Q3. Local Government Area', 'Q4. Ward', 'Q5. Community Name', 'unique_code', 'username', '_validation_status']],
+                left_on='_submission__uuid',
+                right_on='_uuid',
+                how='left'
+            )
+            
+            for mother_id, group in duplicate_mothers_merged.groupby('mother_id'):
+                for idx, row in group.iterrows():
+                    qc_issues.append({
+                        'LGA': row.get('Q3. Local Government Area', ''),
+                        'Ward': row.get('Q4. Ward', ''),
+                        'Community': row.get('Q5. Community Name', ''),
+                        'Unique HH ID': row.get('unique_code', ''),
+                        'Enumerator': row.get('username', ''),
+                        'Validation Status': row.get('_validation_status', ''),
+                        'Issue Type': 'Duplicate Mother ID',
+                        'Description': f'Mother ID "{mother_id}" appears {len(group)} times in the dataset'
+                    })
+    
+    # QC CHECK 9: Duplicate Child IDs
+    if not df_child.empty and 'child_id' in df_child.columns:
+        duplicate_children = df_child[df_child['child_id'].duplicated(keep=False)]
+        
+        if not duplicate_children.empty:
+            # Merge with main to get household info
+            duplicate_children_merged = duplicate_children.merge(
+                df_main[['_uuid', 'Q3. Local Government Area', 'Q4. Ward', 'Q5. Community Name', 'unique_code', 'username', '_validation_status']],
+                left_on='_submission__uuid',
+                right_on='_uuid',
+                how='left'
+            )
+            
+            for child_id, group in duplicate_children_merged.groupby('child_id'):
+                for idx, row in group.iterrows():
+                    qc_issues.append({
+                        'LGA': row.get('Q3. Local Government Area', ''),
+                        'Ward': row.get('Q4. Ward', ''),
+                        'Community': row.get('Q5. Community Name', ''),
+                        'Unique HH ID': row.get('unique_code', ''),
+                        'Enumerator': row.get('username', ''),
+                        'Validation Status': row.get('_validation_status', ''),
+                        'Issue Type': 'Duplicate Child ID',
+                        'Description': f'Child ID "{child_id}" appears {len(group)} times in the dataset'
+                    })
+    
     # Convert to DataFrame
     if qc_issues:
         qc_df = pd.DataFrame(qc_issues)

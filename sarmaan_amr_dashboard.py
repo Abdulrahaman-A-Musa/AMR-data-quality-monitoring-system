@@ -627,13 +627,13 @@ Sokoto,Sokoto South,Rijiaa,Hilin Boka Shiyar Mansur,C3-71742,10
 Sokoto,Sokoto South,Rijiab,Diploma Firstbank,C3-71751,14
 Sokoto,Sokoto South,Rijiab,Garkar Sarkin Gara,C3-71752,10
 Sokoto,Tambuwal,Romo Sarki,Rijiya,C3-71811,3
-Sokoto,Tambuwal,Romo Sarki,Tudun Wada,C3-71812,3
-Sokoto,Tambuwal,Barkejinabaguda,Gidan Mai Zuma,C3-71821,3
+Sokoto,Tambuwal,Romo Sarki,Tulluwa,C3-71812,3
+Sokoto,Tambuwal,Barkejinabaguda,Sabaw,C3-71821,3
 Sokoto,Tambuwal,Barkejinabaguda,Kyanko A,C3-71822,9
 Sokoto,Tambuwal,Bashiremaikada,Labe Gabas,C3-71831,12
 Sokoto,Tambuwal,Bashiremaikada,Maikada Gabas,C3-71832,13
 Sokoto,Tambuwal,Dogondaji,Barguwa,C3-71841,8
-Sokoto,Tambuwal,Dogondaji,Mashekarin Mata,C3-71842,103
+Sokoto,Tambuwal,Dogondaji,Mai Kade,C3-71842,103
 Sokoto,Tambuwal,Fagaalasan,Inwala,C3-71851,4
 Sokoto,Tambuwal,Fagaalasan,Kaurar Inwala,C3-71852,4
 Sokoto,Tangaza,Gidanmadi,Sarakku,C3-71911,15

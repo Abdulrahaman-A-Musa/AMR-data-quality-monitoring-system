@@ -435,7 +435,7 @@ st.markdown(
 
 # ---------------- DATA SOURCE ----------------
 DATA_URL = st.secrets.get("DATA_URL", "")
-MAIN_SHEET = "SARMAAN II C3 SOKOTO AMR PIL..."
+MAIN_SHEET = "SARMAAN II C3 SOKOTO AMR LIV..."
 MOTHER_SHEET = "mother_information"
 CHILD_SHEET = "child_info"
 
@@ -456,7 +456,236 @@ if 'selected_lga' not in st.session_state:
 
 # ---------------- COMMUNITY MAPPING DATA ----------------
 COMMUNITY_MAP_DATA = """state,lga,ward,Community,communitycode,Planned_Community
-Sokoto,Sokoto South,Gagib,Oppa Road,C3-71721,97
+Sokoto,Binji,Binji,Gidan Ayya,C3-70111,7
+Sokoto,Binji,Binji,Gidan Garba Daji,C3-70112,6
+Sokoto,Binji,Bunkari,Danmali Yamma,C3-70121,10
+Sokoto,Binji,Bunkari,Gidan Buji,C3-70122,8
+Sokoto,Binji,Maikulki,Shiyar Umaru Bukata,C3-70131,68
+Sokoto,Binji,Maikulki,Marwa,C3-70132,6
+Sokoto,Binji,Inname,Faruwa,C3-70141,14
+Sokoto,Binji,Inname,Ginjo,C3-70142,6
+Sokoto,Binji,Jamali,Daddale,C3-70151,14
+Sokoto,Binji,Jamali,Jamali Tsohuwa,C3-70152,22
+Sokoto,Bodinga,Bagarawa,Akayi Ii,C3-70211,16
+Sokoto,Bodinga,Bagarawa,Amanawa,C3-70212,13
+Sokoto,Bodinga,Takatuku Madorawa,Madorawa Galadima,C3-70221,15
+Sokoto,Bodinga,Takatuku Madorawa,Milgoma Malama,C3-70222,22
+Sokoto,Bodinga,Bodingatauma,Shiyar Danjekaandi,C3-70231,20
+Sokoto,Bodinga,Bodingatauma,Shiyar Sarki Marafa,C3-70232,12
+Sokoto,Bodinga,Danchadi,Gidandan Bubes Magaji,C3-70241,16
+Sokoto,Bodinga,Danchadi,Kanwuri B,C3-70242,16
+Sokoto,Bodinga,Darhelabadau,Dabagi,C3-70251,15
+Sokoto,Bodinga,Darhelabadau,Tuntsure,C3-70252,15
+Sokoto,Dangeshuni,Tuntube Tsefe,Kwannawa Yamma,C3-70311,26
+Sokoto,Dangeshuni,Tuntube Tsefe,Littigawo,C3-70312,18
+Sokoto,Dangeshuni,Dange,Nasarawa Gabas,C3-70321,18
+Sokoto,Dangeshuni,Dange,Rini,C3-70322,10
+Sokoto,Dangeshuni,Shuni,Makera,C3-70331,12
+Sokoto,Dangeshuni,Shuni,Bayo West,C3-70332,14
+Sokoto,Dangeshuni,Rudu Amanawa,Amanawa Hayi,C3-70341,11
+Sokoto,Dangeshuni,Rudu Amanawa,Amanawa Leprocy,C3-70342,15
+Sokoto,Dangeshuni,Rikina,Rikina Gabas,C3-70351,12
+Sokoto,Dangeshuni,Rikina,Dogon Marke,C3-70352,26
+Sokoto,Gada,Dukamaje,Gidan Karo Shiyar Masallaci,C3-70411,14
+Sokoto,Gada,Dukamaje,Tsuga Hayi,C3-70412,13
+Sokoto,Gada,Kadassaka,Gidan Yaraba Shiyar Runji Gidan Danardo,C3-70421,13
+Sokoto,Gada,Kadassaka,Gidan Musa,C3-70422,16
+Sokoto,Gada,Kadadi,Busaragi,C3-70431,13
+Sokoto,Gada,Kadadi,Kadadi Shiyar Hakimi,C3-70432,14
+Sokoto,Gada,Gada,Gandu,C3-70441,23
+Sokoto,Gada,Gada,Bigal B,C3-70442,30
+Sokoto,Gada,Kaffe,Alibawa Shiyar Gidan Fako,C3-70451,12
+Sokoto,Gada,Kaffe,Dantudu Shiyar Madawaki,C3-70452,13
+Sokoto,Goronyo,Birjingo,Ketawa,C3-70511,16
+Sokoto,Goronyo,Birjingo,Danya,C3-70512,5
+Sokoto,Goronyo,Boyekai,Shiyar Baici Gabas,C3-70521,25
+Sokoto,Goronyo,Boyekai,Shiyar Marafa,C3-70522,5
+Sokoto,Goronyo,Giyawa,Akuzo,C3-70531,9
+Sokoto,Goronyo,Giyawa,Galbace C,C3-70532,15
+Sokoto,Goronyo,Goronyo,Dan Rairai,C3-70541,11
+Sokoto,Goronyo,Goronyo,Kumaji Unguwar Sada,C3-70542,26
+Sokoto,Goronyo,Kagara,Balla Sabon Gari A,C3-70551,24
+Sokoto,Goronyo,Kagara,Gidan Salihu Ka,C3-70552,25
+Sokoto,Gudu,Awilkiti,Awulkitikware,C3-70611,11
+Sokoto,Gudu,Awilkiti,Barebari,C3-70612,11
+Sokoto,Gudu,Karfe Sarki,Karfen Sarki Kanwuri,C3-70621,7
+Sokoto,Gudu,Karfe Sarki,Karfen Sarki Shiyarchirika,C3-70622,5
+Sokoto,Gudu,Balle,Balle Shiyar Dosawa,C3-70631,6
+Sokoto,Gudu,Balle,Gidan Rabo,C3-70632,6
+Sokoto,Gudu,Kurdula,Kurdula Magama Hudu,C3-70641,89
+Sokoto,Gudu,Kurdula,Kurdula Shiyar Tureta,C3-70642,11
+Sokoto,Gudu,Karfen Chana,Karfen Chana Shiyar Yamma,C3-70651,6
+Sokoto,Gudu,Karfen Chana,Karfen Chana Shiyar Kanwuri,C3-70652,10
+Sokoto,Gwadabawa,Asara,Shiyar Galadima,C3-70711,11
+Sokoto,Gwadabawa,Asara,Tungar Tudu Biga,C3-70712,12
+Sokoto,Gwadabawa,Gwadabawa,Yanalewa,C3-70721,18
+Sokoto,Gwadabawa,Gwadabawa,Abdalo Shiyar Fulani,C3-70722,20
+Sokoto,Gwadabawa,Chimola,Kagara,C3-70731,35
+Sokoto,Gwadabawa,Chimola,Kanwuri Gabas,C3-70732,12
+Sokoto,Gwadabawa,Gidankaya,Gidan Dutse,C3-70741,13
+Sokoto,Gwadabawa,Gidankaya,Kilalawa Shiyar Hakimi,C3-70742,11
+Sokoto,Gwadabawa,Gigane,Meli Shiyar Galadima,C3-70751,14
+Sokoto,Gwadabawa,Gigane,Shiyar Galadima,C3-70752,14
+Sokoto,Illela,Araba,B Dusti,C3-70811,5
+Sokoto,Illela,Araba,Danboka,C3-70812,10
+Sokoto,Illela,Illela,Sonnani Kanwuri,C3-70821,50
+Sokoto,Illela,Illela,Karangiyaa,C3-70822,16
+Sokoto,Illela,Gidan Katta,Gaidau Makera,C3-70831,12
+Sokoto,Illela,Gidan Katta,Kwandamo Kanwuri,C3-70832,13
+Sokoto,Illela,Rungumawa Gatti,Gidan Chiwake,C3-70841,6
+Sokoto,Illela,Rungumawa Gatti,Runjitudu B,C3-70842,7
+Sokoto,Illela,Garu,Buwadawa Tsururu,C3-70851,22
+Sokoto,Illela,Garu,Diboni Nasarawa,C3-70852,21
+Sokoto,Isa,Bargaja,Baiche,C3-70911,23
+Sokoto,Isa,Bargaja,Sabon Gari,C3-70912,21
+Sokoto,Isa,Turba,Gatarawa,C3-70921,15
+Sokoto,Isa,Turba,Gumal,C3-70922,16
+Sokoto,Isa,Tsabre,Gidan Abdulkarim,C3-70931,18
+Sokoto,Isa,Tsabre,Girnashe Tsohuwa1,C3-70932,17
+Sokoto,Isa,Isa North,Angawa1,C3-70941,17
+Sokoto,Isa,Isa North,Kantamawa Shiyar Mainasara Magaji,C3-70942,12
+Sokoto,Isa,Isa South,Sabon Gari Bye Pass,C3-70951,9
+Sokoto,Isa,Isa South,Sabon Gari Yamma,C3-70952,14
+Sokoto,Kebbe,Margai East,Shiyar Sarki Margai,C3-71011,7
+Sokoto,Kebbe,Margai East,Shiyar Mairuwa Margai,C3-71012,7
+Sokoto,Kebbe,Girkau,Shiyar Mangu Kanwauri,C3-71021,13
+Sokoto,Kebbe,Girkau,Shiyar Dangara,C3-71022,12
+Sokoto,Kebbe,Kebbeeast,Kebbe Town,C3-71031,11
+Sokoto,Kebbe,Kebbeeast,Shiyar Sabongari,C3-71032,32
+Sokoto,Kebbe,Kebbewest,Shiyar Bazaik,C3-71041,9
+Sokoto,Kebbe,Kebbewest,Shiyar Ajiya,C3-71042,13
+Sokoto,Kebbe,Margai West,Gauru,C3-71051,46
+Sokoto,Kebbe,Margai West,Illela,C3-71052,12
+Sokoto,Kware,Hammaalimma Rabawa,Chimawa,C3-71111,9
+Sokoto,Kware,Hammaalimma Rabawa,Sabon Gari,C3-71112,6
+Sokoto,Kware,Basansan,Adarawa,C3-71121,12
+Sokoto,Kware,Basansan,Gidan Fadama,C3-71122,15
+Sokoto,Kware,Durbawa,Asaula,C3-71131,40
+Sokoto,Kware,Durbawa,Durbawa Bakin Titi,C3-71132,20
+Sokoto,Kware,Gandu,Gidan Alkali,C3-71141,9
+Sokoto,Kware,Gandu,Gidan Dala,C3-71142,10
+Sokoto,Kware,Gidan Ruggamore,Badageni,C3-71151,22
+Sokoto,Kware,Gidanruggamore,G Kwano,C3-71152,18
+Sokoto,Rabah,Gandi1,Adarkawa,C3-71211,17
+Sokoto,Rabah,Gandi1,Dankadu,C3-71212,12
+Sokoto,Rabah,Tsamiya,Shiyar Gabas,C3-71221,15
+Sokoto,Rabah,Tsamiya,Shiyar Dunya,C3-71222,13
+Sokoto,Rabah,Maikujera,Shiyar Dan Galadima,C3-71231,15
+Sokoto,Rabah,Maikujera,Gidan Ali,C3-71232,14
+Sokoto,Rabah,Rarah,Shiyar Yamma A,C3-71241,16
+Sokoto,Rabah,Rarah,Shiyar Yamma B,C3-71242,14
+Sokoto,Rabah,Kurya,Chakaltu,C3-71251,28
+Sokoto,Rabah,Kurya,Mashekari,C3-71252,16
+Sokoto,Sabonbirni,Tarah,Garin Hillo Shiyar Fegi,C3-71311,12
+Sokoto,Sabonbirni,Tarah,Shiyar Kofa,C3-71312,14
+Sokoto,Sabonbirni,Taka Tsaba,Takatsaba Maigari,C3-71321,30
+Sokoto,Sabonbirni,Taka Tsaba,Kibaruwa Maigari,C3-71322,11
+Sokoto,Sabonbirni,Kurawa,Garki Makaranta,C3-71331,16
+Sokoto,Sabonbirni,Kurawa,Shiyar Malumfashi,C3-71332,17
+Sokoto,Sabonbirni,Lajinge,Shiyar Fege Dantudu,C3-71341,16
+Sokoto,Sabonbirni,Lajinge,Lajinge Shiyar Asibiti,C3-71342,14
+Sokoto,Sabonbirni,Makuwana,Zalla Bango Shiyar Maigari,C3-71351,15
+Sokoto,Sabonbirni,Makuwana,Faru Shiyar Adamu,C3-71352,16
+Sokoto,Shagari,Dandinmahe,Dandin Mahe Shiyar Gandu,C3-71411,12
+Sokoto,Shagari,Dandinmahe,Dandin Mahe Shiyar Kanwuri,C3-71412,15
+Sokoto,Shagari,Gangan,Gangan Shiyar Sarkin Fada,C3-71421,32
+Sokoto,Shagari,Gangan,Badin Wakili,C3-71422,13
+Sokoto,Shagari,Horo,Horo Shiyar Dikko,C3-71431,28
+Sokoto,Shagari,Horo,Horo Shiyar Kwadarko,C3-71432,10
+Sokoto,Shagari,Jaredi,Jaredi Shiyar Asibiti,C3-71441,13
+Sokoto,Shagari,Jaredi,Labani,C3-71442,12
+Sokoto,Shagari,Kajiji,Lafiyar Bature,C3-71451,8
+Sokoto,Shagari,Kajiji,Asarara B,C3-71452,18
+Sokoto,Silame,Gande,Falanje,C3-71511,29
+Sokoto,Silame,Gande,Gaukonawa,C3-71512,14
+Sokoto,Silame,Silame,Gandu,C3-71521,11
+Sokoto,Silame,Silame,Sabon Gari,C3-71522,13
+Sokoto,Silame,Jekanaduward,Burmawa,C3-71531,10
+Sokoto,Silame,Jekanaduward,Gabbuwa Gari A,C3-71532,9
+Sokoto,Silame,Kataminorth,Gidan Dari,C3-71541,14
+Sokoto,Silame,Kataminorth,Ingwaba,C3-71542,21
+Sokoto,Silame,Katamisouth,Baichin Koli,C3-71551,29
+Sokoto,Silame,Katamisouth,Gadambe Pegi,C3-71552,11
+Sokoto,Sokoto North,Magajingaria,Binanchi Late Maccido,C3-71611,9
+Sokoto,Sokoto North,Magajingaria,Helele Alh Bello Fari,C3-71612,23
+Sokoto,Sokoto North,Magajingarib,Gidan Sauro Sarkin Baki,C3-71621,13
+Sokoto,Sokoto North,Magajingarib,Sagin Lemu,C3-71622,30
+Sokoto,Sokoto North,Magajinrafia,Alkammawa Saurawa,C3-71631,16
+Sokoto,Sokoto North,Magajinrafia,Alkammawa Shiyar Bunu,C3-71632,13
+Sokoto,Sokoto North,Magajinrafib,Danfili Ashafa,C3-71641,16
+Sokoto,Sokoto North,Magajinrafib,Police Barack Yamma,C3-71642,21
+Sokoto,Sokoto North,Sarkinadargandu,Hajiya Halima C,C3-71651,8
+Sokoto,Sokoto North,Sarkinadargandu,Kaura/Kawa A&Stc,C3-71652,12
+Sokoto,Sokoto South,Gagia,Gagi Rugga Bayan Makaranta,C3-71711,22
+Sokoto,Sokoto South,Gagia,Gidan Masau Shiyar Makaranta,C3-71712,8
+Sokoto,Sokoto South,Gagib,Sagagin Abs Mai Purewater,C3-71721,9
+Sokoto,Sokoto South,Gagib,Sagagin Malan Kwaire,C3-71722,17
+Sokoto,Sokoto South,Gagic,Gidan Dahala Shiyar Asani Baya,C3-71731,47
+Sokoto,Sokoto South,Gagic,Iddi Yar Ksuwa Baya,C3-71732,13
+Sokoto,Sokoto South,Rijiaa,Back Of Specialist,C3-71741,11
+Sokoto,Sokoto South,Rijiaa,Hilin Boka Shiyar Mansur,C3-71742,10
+Sokoto,Sokoto South,Rijiab,Diploma Firstbank,C3-71751,14
+Sokoto,Sokoto South,Rijiab,Garkar Sarkin Gara,C3-71752,10
+Sokoto,Tambuwal,Romo Sarki,Rijiya,C3-71811,3
+Sokoto,Tambuwal,Romo Sarki,Tudun Wada,C3-71812,3
+Sokoto,Tambuwal,Barkejinabaguda,Gidan Mai Zuma,C3-71821,3
+Sokoto,Tambuwal,Barkejinabaguda,Kyanko A,C3-71822,9
+Sokoto,Tambuwal,Bashiremaikada,Labe Gabas,C3-71831,12
+Sokoto,Tambuwal,Bashiremaikada,Maikada Gabas,C3-71832,13
+Sokoto,Tambuwal,Dogondaji,Barguwa,C3-71841,8
+Sokoto,Tambuwal,Dogondaji,Mashekarin Mata,C3-71842,103
+Sokoto,Tambuwal,Fagaalasan,Inwala,C3-71851,4
+Sokoto,Tambuwal,Fagaalasan,Kaurar Inwala,C3-71852,4
+Sokoto,Tangaza,Gidanmadi,Sarakku,C3-71911,15
+Sokoto,Tangaza,Gidanmadi,Gidan Dadi,C3-71912,9
+Sokoto,Tangaza,Kalanjeni,Adarawa Tudu,C3-71921,14
+Sokoto,Tangaza,Kalanjeni,Asarawa Illo,C3-71922,18
+Sokoto,Tangaza,Kwaccehuru,Araba,C3-71931,19
+Sokoto,Tangaza,Kwaccehuru,Araba Daji,C3-71932,8
+Sokoto,Tangaza,Tangaza,Ayama Shiyar Dangaladima,C3-71941,17
+Sokoto,Tangaza,Tangaza,Mallamawa,C3-71942,16
+Sokoto,Tangaza,Sutti,Sutti Shiyar Mallamawa,C3-71951,29
+Sokoto,Tangaza,Sutti,Rini Shiyar Zaure,C3-71952,14
+Sokoto,Tureta,Tureta,Sabon Fegi,C3-72011,12
+Sokoto,Tureta,Tureta,Shiyar Yargar Daye,C3-72012,8
+Sokoto,Tureta,Lofa,Lofa Shiyar Galadima,C3-72021,7
+Sokoto,Tureta,Lofa,Lofa Tudadanni,C3-72022,14
+Sokoto,Tureta,Furagirke,Fura Girke Shiyar Masallachi,C3-72031,12
+Sokoto,Tureta,Furagirke,Fura Girke Shiyar Runji,C3-72032,8
+Sokoto,Tureta,Gidankare,Bimasa Tasha Shiyar Liman,C3-72041,29
+Sokoto,Tureta,Gidankare,Daddabi,C3-72042,8
+Sokoto,Tureta,Lamba Tureta,Shiyar Runji Yamma,C3-72051,18
+Sokoto,Tureta,Lamba Tureta,Achi Asha Ruwa,C3-72052,44
+Sokoto,Wamakko,Arkilla,Bafarawa Qtrs(Wamakko),C3-72111,16
+Sokoto,Wamakko,Arkilla,Gidan Amba,C3-72112,6
+Sokoto,Wamakko,Bado,Alu Quarters,C3-72121,37
+Sokoto,Wamakko,Bado,Badon Rafi Abc,C3-72122,20
+Sokoto,Wamakko,Dundaye,Dundaye Gabas,C3-72131,29
+Sokoto,Wamakko,Dundaye,Kaura Bella,C3-72132,29
+Sokoto,Wamakko,Gumbi,Gidan Boka,C3-72141,5
+Sokoto,Wamakko,Gumbi,Shiyar Marafa A,C3-72142,7
+Sokoto,Wamakko,Kalambaina,Bakin Kusua,C3-72151,6
+Sokoto,Wamakko,Kalambaina,Gidan Sandaa,C3-72152,5
+Sokoto,Wurno,Achida,Sabongari B,C3-72211,23
+Sokoto,Wurno,Achida,Shiyar Ajiya,C3-72212,18
+Sokoto,Wurno,Alkammu,Dan Durumi,C3-72221,11
+Sokoto,Wurno,Alkammu,G Fadama,C3-72222,10
+Sokoto,Wurno,Chachomarnona,Shiyar Sardauna,C3-72231,29
+Sokoto,Wurno,Chachomarnona,Gidan Tudu,C3-72232,7
+Sokoto,Wurno,Dimbiso,Shiyar Bazai,C3-72241,12
+Sokoto,Wurno,Dimbiso,Shiyar Naibi A,C3-72242,10
+Sokoto,Wurno,Dinawa,Gwargawa,C3-72251,12
+Sokoto,Wurno,Dinawa,Sarkin Yaki A,C3-72252,29
+Sokoto,Yabo,Bakale,Bakale Shiyar Makaranta,C3-72311,16
+Sokoto,Yabo,Bakale,Bakale Shiyar Masanlachi,C3-72312,10
+Sokoto,Yabo,Bengaje,Bengaje Shiyar Ajiyai,C3-72321,17
+Sokoto,Yabo,Bengaje,Bengaje Shiyar Magaji Ii,C3-72322,13
+Sokoto,Yabo,Yabo B,Shiyar Ajiya,C3-72331,11
+Sokoto,Yabo,Yabo B,Baice Shiyar Hakimi,C3-72332,16
+Sokoto,Yabo,Birniruwa,Birninruwa D Dutsi,C3-72341,24
+Sokoto,Yabo,Birniruwa,Birninruwa G Galoji,C3-72342,28
+Sokoto,Yabo,Dagawa,Danbalo Sabon Gari,C3-72351,14
+Sokoto,Yabo,Dagawa,Dagawa Shiyar Kanwuri 1,C3-72352,12
 """
 
 # Load community mapping

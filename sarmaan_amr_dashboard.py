@@ -1077,32 +1077,7 @@ def perform_comprehensive_qc_checks(df_main, df_mother, df_child):
                     'Description': 'Urban settlement but household has no basic amenities'
                 })
     
-    # QC CHECK 5: AZM recipients exceeds total children
-    # Q58 (AZM recipients) should not be greater than Q47 (total children 0-59 months)
-    main_total_children_col = 'Q47. How many children in the household are 0-59 months of age?'
-    azm_recipients_col = 'Q58.If yes, how many children received AZM?'
-    
-    if main_total_children_col in df_merged.columns and azm_recipients_col in df_merged.columns:
-        azm_exceeds = df_merged[
-            (df_merged[azm_recipients_col].notna()) &
-            (df_merged[main_total_children_col].notna()) &
-            (pd.to_numeric(df_merged[azm_recipients_col], errors='coerce') > 
-             pd.to_numeric(df_merged[main_total_children_col], errors='coerce'))
-        ]
-        
-        for idx, row in azm_exceeds.iterrows():
-            qc_issues.append({
-                'LGA': row.get('Q3. Local Government Area', ''),
-                'Ward': row.get('Q4. Ward', ''),
-                'Community': row.get('Q5. Community Name', ''),
-                'Unique HH ID': row.get('unique_code', ''),
-                'Enumerator': row.get('username', ''),
-                'Validation Status': row.get('_validation_status', ''),
-                'Issue Type': 'AZM Recipients Exceeds Total Children',
-                'Description': f'AZM recipients: {row[azm_recipients_col]}, Total children: {row[main_total_children_col]}'
-            })
-    
-    # QC CHECK 6: Child age greater than 59 months
+    # QC CHECK 5: Child age greater than 59 months
     child_age_col = 'c_age'
     
     if not df_child.empty and child_age_col in df_child.columns:
@@ -1804,7 +1779,7 @@ def run_dashboard(df_main, df_mother, df_child):
     # Detailed QC Issues Table - Moved to the end
     if not qc_issues_df.empty:
         st.markdown('<div class="section-header"><h2 class="section-title">📋 Detailed QC Issues Table</h2></div>', unsafe_allow_html=True)
-        st.markdown(f"**{total_issues:,}** issues flagged across LGA, Ward, and Community")
+        st.markdown(f"**{total_issues:,}** issues flagged across LGA, Ward, and Community - *Scroll horizontally to view all columns*")
         
         # Add filter expander
         with st.expander("🔍 Filter QC Issues (Optional)"):
@@ -1840,12 +1815,25 @@ def run_dashboard(df_main, df_mother, df_child):
         if selected_validation:
             filtered_qc_df = filtered_qc_df[filtered_qc_df['Validation Status'].isin(selected_validation)]
         
-        # Display filtered table
+        # Display count of filtered issues
+        st.markdown(f"Showing **{len(filtered_qc_df):,}** of **{total_issues:,}** issues")
+        
+        # Display filtered table with column configuration
         st.dataframe(
             filtered_qc_df,
             use_container_width=True,
             hide_index=True,
-            height=400
+            height=500,
+            column_config={
+                "LGA": st.column_config.TextColumn("LGA", width="medium"),
+                "Ward": st.column_config.TextColumn("Ward", width="medium"),
+                "Community": st.column_config.TextColumn("Community", width="medium"),
+                "Unique HH ID": st.column_config.TextColumn("Unique HH ID", width="medium"),
+                "Enumerator": st.column_config.TextColumn("Enumerator", width="medium"),
+                "Validation Status": st.column_config.TextColumn("Validation Status", width="medium"),
+                "Issue Type": st.column_config.TextColumn("Issue Type", width="large"),
+                "Description": st.column_config.TextColumn("Description", width="large")
+            }
         )
     
     # Footer

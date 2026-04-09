@@ -1821,18 +1821,19 @@ def run_dashboard(df_main, df_mother, df_child):
         # Display filtered table with column configuration
         st.dataframe(
             filtered_qc_df,
-            use_container_width=True,
+            use_container_width=False,
             hide_index=True,
             height=500,
+            width=2000,
             column_config={
-                "LGA": st.column_config.TextColumn("LGA", width="medium"),
-                "Ward": st.column_config.TextColumn("Ward", width="medium"),
-                "Community": st.column_config.TextColumn("Community", width="medium"),
-                "Unique HH ID": st.column_config.TextColumn("Unique HH ID", width="medium"),
-                "Enumerator": st.column_config.TextColumn("Enumerator", width="medium"),
-                "Validation Status": st.column_config.TextColumn("Validation Status", width="medium"),
-                "Issue Type": st.column_config.TextColumn("Issue Type", width="large"),
-                "Description": st.column_config.TextColumn("Description", width="large")
+                "LGA": st.column_config.TextColumn("LGA", width=120),
+                "Ward": st.column_config.TextColumn("Ward", width=150),
+                "Community": st.column_config.TextColumn("Community", width=200),
+                "Unique HH ID": st.column_config.TextColumn("Unique HH ID", width=150),
+                "Enumerator": st.column_config.TextColumn("Enumerator", width=150),
+                "Validation Status": st.column_config.TextColumn("Validation Status", width=130),
+                "Issue Type": st.column_config.TextColumn("Issue Type", width=250),
+                "Description": st.column_config.TextColumn("Description", width=400)
             }
         )
     

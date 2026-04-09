@@ -1179,6 +1179,52 @@ def perform_comprehensive_qc_checks(df_main, df_mother, df_child):
                         'Description': f'Child ID "{child_id}" appears {len(group)} times in the dataset'
                     })
     
+    # QC CHECK 10: Children 1-59 months mismatch
+    # Q48 reports children but Q56 total is 0
+    q48_col = 'Q48. How many children in the household are 1-59 months of age?'
+    q56_col = 'Q56. Total Number of Children 1 - 59 months'
+    
+    if q48_col in df_main.columns and q56_col in df_main.columns:
+        children_mismatch = df_main[
+            (pd.to_numeric(df_main[q48_col], errors='coerce') >= 1) &
+            (pd.to_numeric(df_main[q56_col], errors='coerce') == 0)
+        ]
+        
+        for idx, row in children_mismatch.iterrows():
+            qc_issues.append({
+                'LGA': row.get('Q3. Local Government Area', ''),
+                'Ward': row.get('Q4. Ward', ''),
+                'Community': row.get('Q5. Community Name', ''),
+                'Unique HH ID': row.get('unique_code', ''),
+                'Enumerator': row.get('username', ''),
+                'Validation Status': row.get('_validation_status', ''),
+                'Issue Type': 'Children 1-59 Months Count Mismatch',
+                'Description': f'Q48 reports {row[q48_col]} children (1-59 months) but Q56 total is {row[q56_col]}'
+            })
+    
+    # QC CHECK 11: Infants 0-28 days mismatch
+    # Q49 reports infants but Q55 total is 0
+    q49_col = 'Q49. How many children in the household are 0 - 28 days of age?'
+    q55_col = 'Q55. Total Number of Children less than 1 month'
+    
+    if q49_col in df_main.columns and q55_col in df_main.columns:
+        infants_mismatch = df_main[
+            (pd.to_numeric(df_main[q49_col], errors='coerce') >= 1) &
+            (pd.to_numeric(df_main[q55_col], errors='coerce') == 0)
+        ]
+        
+        for idx, row in infants_mismatch.iterrows():
+            qc_issues.append({
+                'LGA': row.get('Q3. Local Government Area', ''),
+                'Ward': row.get('Q4. Ward', ''),
+                'Community': row.get('Q5. Community Name', ''),
+                'Unique HH ID': row.get('unique_code', ''),
+                'Enumerator': row.get('username', ''),
+                'Validation Status': row.get('_validation_status', ''),
+                'Issue Type': 'Infants 0-28 Days Count Mismatch',
+                'Description': f'Q49 reports {row[q49_col]} infants (0-28 days) but Q55 total is {row[q55_col]}'
+            })
+    
     # Convert to DataFrame
     if qc_issues:
         qc_df = pd.DataFrame(qc_issues)

@@ -584,7 +584,7 @@ Sokoto,Sabonbirni,Kurawa,Garki Makaranta,C3-71331,16
 Sokoto,Sabonbirni,Kurawa,Shiyar Malumfashi,C3-71332,17
 Sokoto,Sabonbirni,Lajinge,Shiyar Fege Dantudu,C3-71341,16
 Sokoto,Sabonbirni,Lajinge,Lajinge Shiyar Asibiti,C3-71342,14
-Sokoto,Sabonbirni,Makuwana,Zalla Bango Shiyar Maigari,C3-71351,15
+Sokoto,Sabonbirni,Makuwana,Garin Magaji Sabon Zama,C3-71351,15
 Sokoto,Sabonbirni,Makuwana,Faru Shiyar Adamu,C3-71352,16
 Sokoto,Shagari,Dandinmahe,Dandin Mahe Shiyar Gandu,C3-71411,12
 Sokoto,Shagari,Dandinmahe,Dandin Mahe Shiyar Kanwuri,C3-71412,15
